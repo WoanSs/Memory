@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Siêu Trí Nhớ</title>
+    <title>Memory</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter -->
@@ -32,18 +32,15 @@
             color: #ca8a04; /* yellow-500 */
             background-color: #fef9c3; /* yellow-100 */
         }
-        /* New style for individual number boxes */
+        /* New style for individual number boxes - Base styles, responsive sizes handled by Tailwind classes in HTML */
         .number-box {
             display: inline-flex;
             justify-content: center;
             align-items: center;
-            width: 2.5rem; /* Equivalent to w-10 */
-            height: 2.5rem; /* Equivalent to h-10 */
             margin: 0.125rem; /* Equivalent to m-0.5 */
             border: 1px solid #d1d5db; /* gray-300 */
             border-radius: 0.375rem; /* rounded-md */
             background-color: #f9fafb; /* gray-50 */
-            font-size: 1.25rem; /* text-xl */
             font-weight: 600; /* font-semibold */
             color: #4b5563; /* gray-700 */
         }
@@ -105,25 +102,10 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-white">
                   <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06L13.25 10l.8 2.25H21a.75.75 0 0 1 0 1.5h-1.996l.8 2.25h1.196a.75.75 0 0 1 0 1.5h-1.196l-.8 2.25h1.996a.75.75 0 0 1 0 1.5H12.5a.75.75 0 0 1-.75-.75V19.5c0-.621-.504-1.125-1.125-1.125h-1.5c-.621 0-1.125.504-1.125 1.125v.75a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h1.996l-.8-2.25H3a.75.75 0 0 1 0-1.5h1.196l.8-2.25H3a.75.75 0 0 1 0-1.5h1.996l.8-2.25H3a.75.75 0 0 1 0-1.5H10.75l-1.53-4.59a.75.75 0 0 1 0-1.06l3.75-3.75Z" clip-rule="evenodd" />
                 </svg>
-                <span>Siêu Trí Nhớ</span>
+                <span>Memory</span>
             </h1>
-            <div class="flex space-x-4">
-                <button id="nav-home" class="flex items-center space-x-2 px-4 py-2 rounded-lg transition duration-300 ease-in-out text-white hover:bg-blue-500 hover:bg-opacity-20">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    <span class="font-semibold text-lg">Trang Chủ</span>
-                </button>
-                <button id="nav-techniques" class="flex items-center space-x-2 px-4 py-2 rounded-lg transition duration-300 ease-in-out text-white hover:bg-blue-500 hover:bg-opacity-20">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><polyline points="8 2 8 7 20 7"/></svg>
-                    <span class="font-semibold text-lg">Kỹ Thuật</span>
-                </button>
-                <button id="nav-exercise" class="flex items-center space-x-2 px-4 py-2 rounded-lg transition duration-300 ease-in-out text-white hover:bg-blue-500 hover:bg-opacity-20">
-                    <!-- Brain icon as SVG for Exercise button -->
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-white">
-                      <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06L13.25 10l.8 2.25H21a.75.75 0 0 1 0 1.5h-1.996l.8 2.25h1.196a.75.75 0 0 1 0 1.5h-1.196l-.8 2.25h1.996a.75.75 0 0 1 0 1.5H12.5a.75.75 0 0 1-.75-.75V19.5c0-.621-.504-1.125-1.125-1.125h-1.5c-.621 0-1.125.504-1.125 1.125v.75a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h1.996l-.8-2.25H3a.75.75 0 0 1 0-1.5h1.196l.8-2.25H3a.75.75 0 0 1 0-1.5h1.996l.8-2.25H3a.75.75 0 0 1 0-1.5H10.75l-1.53-4.59a.75.75 0 0 1 0-1.06l3.75-3.75Z" clip-rule="evenodd" />
-                    </svg>
-                    <span class="font-semibold text-lg">Bài Tập</span>
-                </button>
-            </div>
+            <!-- Removed the nav-exercise button, no other buttons needed here -->
+            <div></div> <!-- Empty div to maintain flex spacing if needed, or remove flex parent -->
         </div>
     </nav>
 
@@ -144,7 +126,8 @@
 
     <script>
         // --- Global State Variables ---
-        let currentPage = 'home';
+        // Changed initial page to 'exercise' to make it the main landing page
+        let currentPage = 'exercise';
         let isExerciseActive = false;
         // 'none' | 'shortMemory' | 'longMemoryConfig' | 'longMemoryPlaying' | 'longMemoryAnswering' | 'longMemoryScored'
         let activeExerciseType = 'none';
@@ -172,9 +155,7 @@
 
         // --- DOM Elements ---
         const appTitle = document.getElementById('app-title');
-        const navHome = document.getElementById('nav-home');
-        const navTechniques = document.getElementById('nav-techniques');
-        const navExercise = document.getElementById('nav-exercise');
+        // Removed navHome, navTechniques, and navExercise as they are no longer in the HTML
         const appContent = document.getElementById('app-content');
 
         const helpModalOverlay = document.getElementById('help-modal-overlay');
@@ -248,70 +229,7 @@
         }
 
         // --- Page Content Definitions ---
-        let HomePageContent = `
-            <div class="bg-white p-8 rounded-xl shadow-xl transform transition-all duration-300 hover:scale-[1.005]">
-                <h2 class="text-4xl font-extrabold text-blue-700 mb-6 text-center">Chào mừng đến với Siêu Trí Nhớ!</h2>
-                <p class="text-lg leading-relaxed text-gray-700 mb-6">
-                    Ứng dụng này được thiết kế để giúp bạn phát triển và cải thiện khả năng ghi nhớ của mình thông qua các kỹ thuật tiên tiến và bài tập thực hành hiệu quả.
-                    Khám khám phá các phương pháp ghi nhớ độc đáo và bắt đầu hành trình biến trí nhớ của bạn thành một siêu năng lực ngay hôm nay!
-                </p>
-                <div class="grid md:grid-cols-2 gap-8 text-center mt-10">
-                    <div id="home-techniques-btn" class="bg-blue-100 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-16 h-16 text-blue-600 mx-auto mb-4"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><polyline points="8 2 8 7 20 7"/></svg>
-                        <h3 class="text-2xl font-bold text-blue-800 mb-3">Học Kỹ Thuật</h3>
-                        <p class="text-gray-600">Tìm hiểu các phương pháp ghi nhớ đã được khoa học chứng minh.</p>
-                    </div>
-                    <div id="home-practice-btn" class="bg-purple-100 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-16 h-16 text-purple-600 mx-auto mb-4"><path d="M12 2a3 3 0 0 0-3 3v7c0 1.66 1.34 3 3 3s3-1.34 3-3V5a3 3 0 0 0-3-3z"/><path d="M5 9.38v2.24L4 12c-1.33 0-2.67.5-3.67 1.5l1.67 1.67C2.9 16.5 4.4 17 6 17c1.1 0 2.2-.4 3-.9L9.38 17"/><path d="M19 9.38v2.24L20 12c1.33 0 2.67.5-3.67 1.5l-1.67 1.67C21.1 16.5 19.6 17 18 17c-1.1 0-2.2-.4-3-.9L14.62 17"/><path d="M12 15c-3.31 0-6 2.69-6 6h12c0-3.31-2.69-6-6-6z"/></svg>
-                        <h3 class="text-2xl font-bold text-purple-800 mb-3">Thực Hành</h3>
-                        <p class="text-gray-600">Áp dụng kiến thức vào các bài tập thực tế để củng cố trí nhớ.</p>
-                    </div>
-                </div>
-            </div>`;
-
-        let TechniquesPageContent = `
-            <div class="bg-white p-8 rounded-xl shadow-xl">
-                <h2 class="text-4xl font-extrabold text-blue-700 mb-8 text-center">Các Kỹ Thuật Ghi Nhớ</h2>
-
-                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6 border border-blue-200">
-                    <div class="flex items-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-600"><path d="M15 14v.01"/><path d="M12 17v.01"/><path d="M9 14v.01"/><path d="M18 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2z"/></svg>
-                        <h3 class="text-2xl font-bold text-blue-800 ml-3">Phương pháp Loci (Cung điện Trí nhớ)</h3>
-                    </div>
-                    <p class="text-gray-700 leading-relaxed mb-3">
-                        <span class="font-semibold">Mô tả:</span> Liên kết thông tin cần nhớ với các địa điểm cụ thể trong một không gian quen thuộc (nhà, đường đi...). Khi cần nhớ, bạn chỉ cần 'đi dạo' trong không gian đó và 'thu thập' thông tin.
-                    </p>
-                    <p class="text-gray-700 leading-relaxed italic border-l-4 border-blue-400 pl-4 py-1 bg-blue-100 rounded-md">
-                        <span class="font-semibold not-italic">Ví dụ:</span> Để nhớ danh sách mua sắm (sữa, bánh mì, trứng): tưởng tượng một chai sữa khổng lồ ở cửa vào nhà bạn, một ổ bánh mì nằm trên ghế sofa, và một quả trứng đang lăn trên sàn nhà bếp.
-                    </p>
-                </div>
-
-                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6 border border-blue-200">
-                    <div class="flex items-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-green-600"><path d="M15 14v.01"/><path d="M12 17v.01"/><path d="M9 14v.01"/><path d="M18 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2z"/></svg>
-                        <h3 class="text-2xl font-bold text-blue-800 ml-3">Hệ thống Chốt (Peg System)</h3>
-                    </div>
-                    <p class="text-gray-700 leading-relaxed mb-3">
-                        <span class="font-semibold">Mô tả:</span> Gắn các con số (hoặc thứ tự) với các từ/hình ảnh 'chốt' cố định, sau đó liên kết thông tin cần nhớ với hình ảnh chốt tương ứng. Hệ thống này thường dùng cho việc ghi nhớ danh sách có thứ tự.
-                    </p>
-                    <p class="text-gray-700 leading-relaxed italic border-l-4 border-blue-400 pl-4 py-1 bg-blue-100 rounded-md">
-                        <span class="font-semibold not-italic">Ví dụ:</span> Nếu 1 = 'Que củi', 2 = 'Cánh én': để nhớ 'sữa' là mục số 1, hãy tưởng tượng một chai sữa đang được đun trên que củi. Để nhớ 'bánh mì' là mục số 2, hãy tưởng tượng một chiếc bánh mì đang bay cùng cánh én.
-                    </p>
-                </div>
-
-                <div class="bg-blue-50 p-6 rounded-lg shadow-md mb-6 border border-blue-200">
-                    <div class="flex items-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-600"><path d="M15 14v.01"/><path d="M12 17v.01"/><path d="M9 14v.01"/><path d="M18 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2z"/></svg>
-                        <h3 class="text-2xl font-bold text-blue-800 ml-3">Phương pháp Liên kết (Link Method)</h3>
-                    </div>
-                    <p class="text-gray-700 leading-relaxed mb-3">
-                        <span class="font-semibold">Mô tả:</span> Tạo ra một câu chuyện hoặc chuỗi hình ảnh liên kết các mục cần nhớ lại với nhau một cách sáng tạo và đôi khi phi lý, để tạo ấn tượng mạnh mẽ trong tâm trí.
-                    </p>
-                    <p class="text-gray-700 leading-relaxed italic border-l-4 border-blue-400 pl-4 py-1 bg-blue-100 rounded-md">
-                        <span class="font-semibold not-italic">Ví dụ:</span> Để nhớ một loạt từ: 'Mèo, Sách, Cà phê, Đèn': tưởng tượng một con MÈO đang đọc SÁCH, uống CÀ PHÊ dưới ánh ĐÈN sáng trưng.
-                    </p>
-                </div>
-            </div>`;
+        // Removed HomePageContent and TechniquesPageContent as they are no longer used.
 
         const ExercisePageContent = () => {
             let mainContent = '';
@@ -319,17 +237,17 @@
                 // Initial exercise selection screen
                 mainContent = `
                     <div class="bg-white p-8 rounded-xl shadow-xl">
-                        <h2 class="text-4xl font-extrabold text-blue-700 mb-8 text-center">Các Bài Tập Rèn Luyện Trí Nhớ</h2>
+                        <h2 class="text-4xl font-extrabold text-blue-700 mb-8 text-center">Bài Tập Rèn Luyện Trí Nhớ</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
                             <!-- Short Memory Section -->
                             <div id="short-memory-section" class="p-6 bg-blue-50 rounded-xl shadow-md border border-blue-200 cursor-pointer hover:shadow-lg transition-shadow duration-300">
-                                <h3 class="text-3xl font-bold text-blue-800 mb-4 text-center">Trí Nhớ Ngắn Hạn</h3>
+                                <h3 class="text-3xl font-bold text-blue-800 mb-4 text-center">Short Memory</h3>
                                 <p class="text-lg leading-relaxed text-gray-700 mb-6 text-center">Rèn luyện khả năng ghi nhớ và tái hiện thông tin trong thời gian ngắn.</p>
                                 <div class="flex justify-center"><button id="start-short-memory-exercise" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">Bắt Đầu</button></div>
                             </div>
                             <!-- Long Memory Section -->
                             <div id="long-memory-section" class="p-6 bg-green-50 rounded-xl shadow-md border border-green-200 cursor-pointer hover:shadow-lg transition-shadow duration-300">
-                                <h3 class="text-3xl font-bold text-green-800 mb-4 text-center">Trí Nhớ Dài Hạn</h3>
+                                <h3 class="text-3xl font-bold text-green-800 mb-4 text-center">Long Memory</h3>
                                 <p class="text-lg leading-relaxed text-gray-700 text-center mb-6">Củng cố và lưu giữ thông tin trong thời gian dài.</p>
                                 <div class="flex justify-center"><button id="start-long-memory-exercise" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">Bắt Đầu</button></div>
                             </div>
@@ -341,10 +259,12 @@
                 switch (activeExerciseType) {
                     case 'shortMemory':
                         exerciseUI = `
-                            <h2 class="text-4xl font-extrabold text-blue-700 mb-8 text-center">Bài Tập: Ghi Nhớ Số</h2>
+                            <h2 class="text-4xl font-extrabold text-blue-700 mb-8 text-center">Short Memory</h2>
                             <p class="text-lg leading-relaxed text-gray-700 mb-6">Luyện tập khả năng ghi nhớ dãy số. Một dãy số với độ dài <b>${digitCount}</b> chữ số sẽ xuất hiện, sau đó biến mất. Hãy cố gắng ghi nhớ và nhập lại.</p>
                             <div class="text-center mb-6">
-                                <div id="numbers-display" class="text-4xl font-bold text-gray-400 bg-gray-50 py-6 px-10 rounded-lg inline-block shadow-inner">${showNumbers ? numbers.join('') : Array(digitCount).fill('*').join('')}</div>
+                                <div id="numbers-display" class="text-4xl font-bold text-gray-400 bg-gray-50 py-6 px-10 rounded-lg inline-block shadow-inner">
+                                    ${showNumbers ? numbers.join('') : Array(digitCount).fill('*').join('')}
+                                </div>
                             </div>
                             <div class="flex flex-col items-center space-y-4">
                                 <div id="short-memory-input-boxes" class="flex flex-wrap justify-center mt-4 ${showNumbers ? 'hidden' : ''}">
@@ -353,8 +273,8 @@
                                             data-short-memory-char-index="${charIndex}"
                                             maxlength="1"
                                             value="${shortMemoryUserInput[charIndex] || ''}"
-                                            class="number-box w-10 h-10 text-center text-xl font-mono
-                                                   border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none
+                                            class="number-box w-6 h-6 text-sm sm:w-8 sm:h-8 sm:text-base md:w-10 md:h-10 md:text-xl
+                                                   text-center font-mono border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none
                                                    border-input-default">
                                     `).join('')}
                                 </div>
@@ -372,7 +292,7 @@
                         break;
                     case 'longMemoryConfig':
                         exerciseUI = `
-                            <h2 class="text-4xl font-extrabold text-blue-700 mb-8 text-center">Cấu Hình Bài Tập Trí Nhớ Dài Hạn</h2>
+                            <h2 class="text-4xl font-extrabold text-blue-700 mb-8 text-center">Long Memory</h2>
                             <div class="space-y-6 max-w-md mx-auto text-left">
                                 <div>
                                     <label for="memorize-time" class="block text-lg font-medium text-gray-700 mb-2">Thời gian nhớ (phút):</label>
@@ -395,7 +315,7 @@
                         break;
                     case 'longMemoryPlaying':
                          exerciseUI = `
-                            <h2 class="text-4xl font-extrabold text-blue-700 mb-4 text-center">Giai Đoạn Ghi Nhớ</h2>
+                            <h2 class="text-4xl font-extrabold text-blue-700 mb-4 text-center">Long Memory</h2>
                             <p class="text-lg text-gray-600 mb-4 text-center">Cố gắng ghi nhớ các dòng dữ liệu sau đây.</p>
                             <div class="text-center mb-4"><span class="text-4xl font-bold text-green-700" id="long-memory-timer-display">${formatTime(longMemoryTimeRemaining)}</span></div>
                             <div class="bg-gray-50 p-4 rounded-lg shadow-inner font-mono text-lg space-y-2 overflow-y-auto max-h-[60vh]">
@@ -403,7 +323,7 @@
                                     <div class="flex items-center mb-1">
                                         <span class="font-sans font-bold text-gray-500 w-10 text-left">${index + 1}.</span>
                                         <div class="flex flex-wrap flex-grow border border-gray-200 rounded-md p-1">
-                                            ${line.split('').map(char => `<span class="number-box">${char}</span>`).join('')}
+                                            ${line.split('').map(char => `<span class="number-box w-6 h-6 text-sm sm:w-8 sm:h-8 sm:text-base md:w-10 md:h-10 md:text-xl">${char}</span>`).join('')}
                                         </div>
                                     </div>
                                 `).join('')}
@@ -414,7 +334,7 @@
                         break;
                     case 'longMemoryAnswering':
                         exerciseUI = `
-                            <h2 class="text-4xl font-extrabold text-blue-700 mb-4 text-center">Giai Đoạn Trả Lời</h2>
+                            <h2 class="text-4xl font-extrabold text-blue-700 mb-4 text-center">Long Memory</h2>
                             <p class="text-lg text-gray-600 mb-4 text-center">Nhập lại các dòng dữ liệu bạn đã nhớ.</p>
                             <div class="text-center mb-4"><span class="text-4xl font-bold text-red-600" id="answer-timer-display">${formatTime(answerTimeRemaining)}</span></div>
                             <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
@@ -428,7 +348,8 @@
                                                     data-char-index="${charIndex}"
                                                     maxlength="1"
                                                     value="${longMemoryUserInput[lineIndex][charIndex]}"
-                                                    class="number-box w-10 h-10 text-center text-xl font-mono
+                                                    class="number-box w-6 h-6 text-sm sm:w-8 sm:h-8 sm:text-base md:w-10 md:h-10 md:text-xl
+                                                           text-center font-mono
                                                            border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none
                                                            border-input-default">
                                             `).join('')}
@@ -1012,11 +933,8 @@
          */
         function attachEventListeners() {
             // Clear existing listeners to prevent duplicates and memory leaks
-            // For static elements, simply re-assign onClick or remove/add listeners
             appTitle.onclick = null;
-            navHome.onclick = null;
-            navTechniques.onclick = null;
-            navExercise.onclick = null;
+            // Removed navHome, navTechniques, and navExercise onclick listeners as the buttons are removed
             
             // Remove previous event listeners for dynamic inputs and keydowns
             appContent.removeEventListener('input', handleDynamicInputDelegation);
@@ -1026,88 +944,70 @@
 
             // Add new listeners
             // Global Navigation
-            appTitle.onclick = () => { currentPage = 'home'; endExercise(); }; // Go to home and reset exercise
-            navHome.onclick = () => { currentPage = 'home'; endExercise(); };
-            navTechniques.onclick = () => { currentPage = 'techniques'; endExercise(); };
-            navExercise.onclick = () => { currentPage = 'exercise'; endExercise(); };
+            // Click on app title will now reset the exercise and show exercise selection
+            appTitle.onclick = () => { endExercise(); }; 
 
             // Help modal close button
             helpModalCloseBtn.onclick = hideHelpModal;
 
 
-            // Page-specific listeners
-            if (currentPage === 'home') {
-                const homePracticeBtn = document.getElementById('home-practice-btn');
-                if (homePracticeBtn) {
-                    homePracticeBtn.addEventListener('click', () => {
-                        currentPage = 'exercise';
-                        endExercise(); // Ensure any active exercise is reset when navigating to exercises
-                    });
-                }
-                const homeTechniquesBtn = document.getElementById('home-techniques-btn'); // Add listener for "Học Kỹ Thuật"
-                if (homeTechniquesBtn) {
-                    homeTechniquesBtn.addEventListener('click', () => {
-                        currentPage = 'techniques';
-                        endExercise(); // Ensure any active exercise is reset when navigating to techniques
-                    });
-                }
-            } else if (currentPage === 'exercise') {
-                if (!isExerciseActive) {
-                    // Exercise selection screen
-                    const startShortMemoryBtn = document.getElementById('start-short-memory-exercise');
-                    if (startShortMemoryBtn) startShortMemoryBtn.addEventListener('click', startShortMemoryExercise);
+            // Page-specific listeners (only exercise page logic remains relevant here)
+            // No longer need to check currentPage for home/techniques
+            if (!isExerciseActive) {
+                // Exercise selection screen
+                const startShortMemoryBtn = document.getElementById('start-short-memory-exercise');
+                if (startShortMemoryBtn) startShortMemoryBtn.addEventListener('click', startShortMemoryExercise);
 
-                    const startLongMemoryBtn = document.getElementById('start-long-memory-exercise');
-                    if (startLongMemoryBtn) startLongMemoryBtn.addEventListener('click', startLongMemoryConfig);
+                const startLongMemoryBtn = document.getElementById('start-long-memory-exercise');
+                if (startLongMemoryBtn) startLongMemoryBtn.addEventListener('click', startLongMemoryConfig);
 
-                } else if (activeExerciseType === 'shortMemory') {
-                    // Short Memory game screen
-                    appContent.addEventListener('input', handleDynamicInputDelegation); // Add input listener for short memory boxes
-                    appContent.addEventListener('keydown', handleDynamicKeydownDelegation); // Add keydown listener for short memory boxes
+            } else if (activeExerciseType === 'shortMemory') {
+                // Short Memory game screen
+                appContent.addEventListener('input', handleDynamicInputDelegation); // Add input listener for short memory boxes
+                appContent.addEventListener('keydown', handleDynamicKeydownDelegation); // Add keydown listener for short memory boxes
 
-                    const checkAnswerBtn = document.getElementById('check-answer-btn');
-                    if (checkAnswerBtn) {
-                        checkAnswerBtn.addEventListener('click', checkAnswer);
-                    }
-
-                    const endExerciseBtn = document.getElementById('end-exercise-btn');
-                    if (endExerciseBtn) endExerciseBtn.addEventListener('click', endExercise);
-
-                    const helpShortMemoryBtn = document.getElementById('help-short-memory-btn');
-                    if (helpShortMemoryBtn) helpShortMemoryBtn.addEventListener('click', () => showHelpModal('shortMemory'));
-
-
-                } else if (activeExerciseType === 'longMemoryConfig') {
-                    // Long Memory configuration screen
-                    const startLongMemoryGameBtn = document.getElementById('start-long-memory-game-btn');
-                    if (startLongMemoryGameBtn) startLongMemoryGameBtn.addEventListener('click', startLongMemoryGame);
-                    const cancelLongMemoryConfigBtn = document.getElementById('cancel-long-memory-config-btn');
-                    if (cancelLongMemoryConfigBtn) cancelLongMemoryConfigBtn.addEventListener('click', endExercise);
-                    const helpLongMemoryConfigBtn = document.getElementById('help-long-memory-config-btn');
-                    if (helpLongMemoryConfigBtn) helpLongMemoryConfigBtn.addEventListener('click', () => showHelpModal('longMemory'));
-
-
-                } else if (activeExerciseType === 'longMemoryPlaying') {
-                    // Long Memory playing screen
-                    const skipMemorizeBtn = document.getElementById('skip-memorize-btn');
-                    if (skipMemorizeBtn) skipMemorizeBtn.addEventListener('click', skipMemorizePhase);
-
-                } else if (activeExerciseType === 'longMemoryAnswering') {
-                    // Long Memory answering screen - use event delegation for inputs and keydowns
-                    appContent.addEventListener('input', handleDynamicInputDelegation);
-                    appContent.addEventListener('keydown', handleDynamicKeydownDelegation); // Add keydown listener
-                    const scoreLongMemoryBtn = document.getElementById('score-long-memory-btn');
-                    if (scoreLongMemoryBtn) scoreLongMemoryBtn.addEventListener('click', scoreLongMemoryExercise);
-                    // helpLongMemoryBtn removed from here
-
-                } else if (activeExerciseType === 'longMemoryScored') {
-                    // Long Memory scored results screen
-                    const endExerciseBtn = document.getElementById('end-exercise-btn');
-                    if (endExerciseBtn) endExerciseBtn.addEventListener('click', endExercise);
+                const checkAnswerBtn = document.getElementById('check-answer-btn');
+                if (checkAnswerBtn) {
+                    checkAnswerBtn.addEventListener('click', checkAnswer);
                 }
 
-                // Removed clear history button
+                const endExerciseBtn = document.getElementById('end-exercise-btn');
+                if (endExerciseBtn) endExerciseBtn.addEventListener('click', endExercise);
+
+                const helpShortMemoryBtn = document.getElementById('help-short-memory-btn');
+                if (helpShortMemoryBtn) helpShortMemoryBtn.addEventListener('click', () => showHelpModal('shortMemory'));
+
+
+            } else if (activeExerciseType === 'longMemoryConfig') {
+                // Long Memory configuration screen
+                const startLongMemoryGameBtn = document.getElementById('start-long-memory-game-btn');
+                if (startLongMemoryGameBtn) startLongMemoryGameBtn.addEventListener('click', startLongMemoryGame);
+                const cancelLongMemoryConfigBtn = document.getElementById('cancel-long-memory-config-btn');
+                if (cancelLongMemoryConfigBtn) cancelLongMemoryConfigBtn.addEventListener('click', endExercise);
+                const helpLongMemoryConfigBtn = document.getElementById('help-long-memory-config-btn');
+                if (helpLongMemoryConfigBtn) helpLongMemoryConfigBtn.addEventListener('click', () => showHelpModal('longMemory'));
+
+
+            } else if (activeExerciseType === 'longMemoryPlaying') {
+                // Long Memory playing screen
+                const skipMemorizeBtn = document.getElementById('skip-memorize-btn');
+                if (skipMemorizeBtn) skipMemorizeBtn.addEventListener('click', skipMemorizePhase);
+
+            } else if (activeExerciseType === 'longMemoryAnswering') {
+                // Long Memory answering screen - use event delegation for inputs and keydowns
+                appContent.addEventListener('input', handleDynamicInputDelegation);
+                appContent.addEventListener('keydown', handleDynamicKeydownDelegation); // Add keydown listener
+                const scoreLongMemoryBtn = document.getElementById('score-long-memory-btn');
+                if (scoreLongMemoryBtn) scoreLongMemoryBtn.addEventListener('click', scoreLongMemoryExercise);
+                // helpLongMemoryBtn removed from here
+
+            } else if (activeExerciseType === 'longMemoryScored') {
+                // Long Memory scored results screen
+                const endExerciseBtn = document.getElementById('end-exercise-btn');
+                if (endExerciseBtn) endExerciseBtn.addEventListener('click', endExercise);
             }
+
+            // Removed clear history button
         }
 
         /**
@@ -1149,14 +1049,7 @@
          * This is the main function to update the UI.
          */
         function renderPage() {
-            let content = '';
-            if (currentPage === 'home') {
-                content = HomePageContent;
-            } else if (currentPage === 'techniques') {
-                content = TechniquesPageContent;
-            } else if (currentPage === 'exercise') {
-                content = ExercisePageContent();
-            }
+            let content = ExercisePageContent(); // Always render exercise content
             appContent.innerHTML = content;
             attachEventListeners(); // Re-attach event listeners after content is rendered
         }
@@ -1170,4 +1063,3 @@
     </script>
 </body>
 </html>
-
