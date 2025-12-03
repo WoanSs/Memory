@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Memory Pro Mobile</title>
+    
+    <!-- THÊM DÒNG NÀY: Favicon (Logo trên tab trình duyệt) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%232563eb%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M13 10V3L4 14h7v7l9-11h-7z%22/></svg>">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
     
@@ -35,6 +39,7 @@
         <div class="container mx-auto px-4 h-full flex items-center justify-between max-w-4xl">
             <div class="flex items-center gap-2 cursor-pointer active:opacity-70" onclick="window.location.reload()">
                 <div class="bg-primary-600 text-white p-1.5 rounded-lg shadow-sm">
+                    <!-- Logo SVG giống hệt favicon -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
                 <span class="font-bold text-slate-800 text-lg tracking-tight">Memory<span class="text-primary-600">Pro</span></span>
@@ -80,7 +85,6 @@
 
             else if(activeView === 'sm_play') {
                 if(smShow) {
-                    // Logic chỉnh cỡ chữ thông minh
                     let textSize = 'text-7xl'; 
                     if(sm.count > 25) textSize = 'text-2xl';
                     else if(sm.count > 15) textSize = 'text-3xl';
@@ -106,7 +110,6 @@
                             <button onclick="startSM()" class="mt-4 px-6 py-2 bg-slate-800 text-white rounded-lg font-bold active:bg-slate-900">Thử lại</button>
                         </div>`;
 
-                    // Input đầu tiên có autofocus
                     const inputs = Array(sm.count).fill('').map((_, i) => `
                         <input data-type="sm" data-idx="${i}" value="${sm.input[i]||''}" type="tel" pattern="[0-9]*" maxlength="1" 
                         ${i===0 ? 'autofocus' : ''} 
@@ -281,15 +284,10 @@
             const wait = Math.max(1000, sm.count*600);
             smTimer = setTimeout(() => {
                 smShow=false; render();
-                
-                // FORCE KEYBOARD ON MOBILE
                 setTimeout(() => {
                     const el = document.querySelector('input[data-idx="0"]');
-                    if(el) { 
-                        el.focus(); 
-                        el.click(); // Trick cho iOS
-                    }
-                }, 150); // Delay một chút để đảm bảo DOM đã sẵn sàng
+                    if(el) { el.focus(); el.click(); }
+                }, 150);
             }, wait);
         }
         function checkSM() {
@@ -320,10 +318,7 @@
         function toggleMask(i) {
             lm.mask[i] = !lm.mask[i];
             const el = document.getElementById(`row-${i}`);
-            if(el) {
-                el.classList.toggle('blur-content');
-                render(); 
-            }
+            if(el) { el.classList.toggle('blur-content'); render(); }
         }
         function lmPhase2() {
             stopTimer();
