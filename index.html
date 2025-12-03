@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Memory Trainer Pro</title>
+    <title>Memory Pro Mobile</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fonts: Inter (UI) & Roboto Mono (Numbers) -->
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
     
     <script>
@@ -18,57 +18,59 @@
                         mono: ['Roboto Mono', 'monospace'],
                     },
                     colors: {
-                        primary: { 600: '#2563eb', 700: '#1d4ed8' }, // Royal Blue (Dễ chịu)
-                        dark: { 800: '#1e293b', 900: '#0f172a' }     // Slate Dark
+                        primary: { 600: '#2563eb', 700: '#1d4ed8' } // Royal Blue
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Nền dịu mắt */
-        body { background-color: #f1f5f9; color: #1e293b; }
+        /* Nền chống chói */
+        body { background-color: #f8fafc; color: #334155; }
         
-        /* Input styles tối ưu cảm ứng */
+        /* Input tối ưu cảm ứng */
         .number-box {
-            transition: border-color 0.15s, box-shadow 0.15s;
-            -webkit-appearance: none; /* Fix iOS styles */
-            margin: 2px;
+            transition: all 0.15s;
+            -webkit-appearance: none;
+            margin: 0;
+            border-radius: 8px;
         }
         .number-box:focus {
             border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
             outline: none;
             background-color: #fff;
+            transform: scale(1.05);
+            z-index: 10;
         }
 
-        /* Màu kết quả tương phản cao */
-        .char-correct { color: #15803d; font-weight: 700; } /* Green-700 */
-        .char-incorrect { color: #b91c1c; text-decoration: line-through; opacity: 0.8; } /* Red-700 */
-        .char-missing { background-color: #fef3c7; color: #b45309; } /* Amber */
+        /* Màu kết quả */
+        .char-correct { color: #15803d; font-weight: 700; }
+        .char-incorrect { color: #b91c1c; text-decoration: line-through; opacity: 0.8; }
+        .char-missing { background-color: #fef3c7; color: #b45309; }
 
-        /* Masking */
-        .blur-content { opacity: 0.2; filter: blur(4px); user-select: none; }
+        /* Hiệu ứng che mờ */
+        .blur-content { opacity: 0.15; filter: blur(5px); user-select: none; }
         
-        /* Mobile Grid Fixes */
+        /* Lưới nhập liệu thông minh trên mobile */
         .grid-inputs {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
-            gap: 4px;
+            grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); /* Tự động xuống dòng */
+            gap: 6px;
         }
         @media (min-width: 640px) {
-            .grid-inputs { grid-template-columns: repeat(auto-fill, minmax(36px, 1fr)); gap: 6px; }
+            .grid-inputs { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; }
         }
     </style>
 </head>
-<body class="antialiased pb-10">
+<body class="antialiased pb-10 min-h-screen flex flex-col">
 
-    <!-- Header đơn giản -->
-    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-        <div class="container mx-auto px-4 h-14 flex items-center justify-between max-w-4xl">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.reload()">
-                <div class="bg-primary-600 text-white p-1.5 rounded-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    <!-- Header -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 h-14 flex-none shadow-sm">
+        <div class="container mx-auto px-4 h-full flex items-center justify-between max-w-4xl">
+            <div class="flex items-center gap-2 cursor-pointer active:opacity-70" onclick="window.location.reload()">
+                <div class="bg-primary-600 text-white p-1.5 rounded-lg shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
                 <span class="font-bold text-slate-800 text-lg tracking-tight">Memory<span class="text-primary-600">Pro</span></span>
             </div>
@@ -76,54 +78,50 @@
     </nav>
 
     <!-- Main Content -->
-    <main id="app" class="container mx-auto px-3 py-6 max-w-4xl"></main>
+    <main id="app" class="container mx-auto px-3 py-6 max-w-4xl flex-1 flex flex-col"></main>
 
     <script>
         // --- STATE ---
         let activeView = 'home'; 
         
-        // Short Mem State
+        // Short Memory State
         let sm = { data: [], input: [], count: 1, streak: 0, best: parseInt(localStorage.getItem('best_sm')||0) };
         let smTimer = null;
         let smFeedback = '';
         let smShow = false;
 
-        // Long Mem State
+        // Long Memory State
         let lm = { 
-            lines: [], 
-            inputs: [], 
-            mask: {}, 
+            lines: [], inputs: [], mask: {}, 
             config: { mem: 5, ans: 5, cnt: 2 },
-            timer: 0,
-            timerId: null
+            timer: 0, timerId: null
         };
 
         const app = document.getElementById('app');
 
         // --- UTILS ---
         const fmtTime = s => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-        // Group numbers by 2, add space
-        const grp = s => s ? s.match(/.{1,2}/g).join(' ') : '';
+        const grp = s => s ? s.match(/.{1,2}/g).join(' ') : ''; // Nhóm 2 số
 
-        // --- VIEWS RENDERER ---
+        // --- RENDERER ---
         function render() {
             let html = '';
 
             // 1. HOME SCREEN
             if(activeView === 'home') {
                 html = `
-                <div class="grid gap-4 md:grid-cols-2">
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-primary-600 transition-colors cursor-pointer" onclick="startSM()">
-                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-2xl mb-4">⚡</div>
+                <div class="grid gap-4 md:grid-cols-2 animate-fade-in mt-4">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm active:scale-95 transition-transform cursor-pointer" onclick="startSM()">
+                        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-4 shadow-inner">⚡</div>
                         <h2 class="text-xl font-bold text-slate-800">Phản Xạ Nhanh</h2>
-                        <p class="text-slate-500 text-sm mt-2 mb-4">Nhớ số ngẫu nhiên tức thì.</p>
-                        <div class="text-xs font-bold text-slate-400 uppercase">Kỷ lục: ${sm.best}</div>
+                        <p class="text-slate-500 text-sm mt-1 mb-4">Luyện trí nhớ ngắn hạn.</p>
+                        <div class="text-xs font-bold text-slate-400 uppercase bg-slate-50 inline-block px-2 py-1 rounded">Kỷ lục: ${sm.best}</div>
                     </div>
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-primary-600 transition-colors cursor-pointer" onclick="configLM()">
-                        <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center text-2xl mb-4">🧠</div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm active:scale-95 transition-transform cursor-pointer" onclick="configLM()">
+                        <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl mb-4 shadow-inner">🧠</div>
                         <h2 class="text-xl font-bold text-slate-800">Dữ Liệu Lớn</h2>
-                        <p class="text-slate-500 text-sm mt-2 mb-4">Nhớ 40 số/dòng. Chế độ chuyên nghiệp.</p>
-                        <div class="text-xs font-bold text-slate-400 uppercase">Sẵn sàng</div>
+                        <p class="text-slate-500 text-sm mt-1 mb-4">Luyện nhớ số lượng lớn.</p>
+                        <div class="text-xs font-bold text-slate-400 uppercase bg-slate-50 inline-block px-2 py-1 rounded">Chế độ Pro</div>
                     </div>
                 </div>`;
             }
@@ -132,42 +130,39 @@
             else if(activeView === 'sm_play') {
                 if(smShow) {
                     html = `
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 min-h-[50vh] flex flex-col items-center justify-center p-4 text-center">
-                        <div class="text-slate-400 text-xs font-bold uppercase mb-8 tracking-widest">GHI NHỚ</div>
-                        <div class="text-6xl md:text-8xl font-mono font-bold text-slate-800 tracking-widest break-all">${sm.data.join('')}</div>
-                        <div class="mt-10 w-full max-w-xs h-1 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full bg-primary-600 transition-all duration-500 w-0 animate-[width_linear_forwards]" style="animation-duration: ${Math.max(1, sm.count*0.6)}s; width: 100%"></div>
+                    <div class="flex-1 flex flex-col items-center justify-center min-h-[60vh]">
+                        <div class="text-slate-400 text-xs font-bold uppercase mb-8 tracking-[0.2em]">GHI NHỚ</div>
+                        <div class="text-7xl md:text-9xl font-mono font-bold text-slate-800 tracking-widest select-none drop-shadow-sm">${sm.data.join('')}</div>
+                        <div class="mt-12 w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary-600 animate-[width_linear_forwards]" style="width:100%; animation-duration:${Math.max(1, sm.count*0.6)}s"></div>
                         </div>
                     </div>`;
                 } else {
-                    let feedbackHtml = '';
-                    if(smFeedback === 'correct') {
-                        feedbackHtml = `<div class="mt-6 p-3 bg-green-50 text-green-700 rounded-lg font-bold text-center">Chính xác! Tiếp tục...</div>`;
-                    } else if(smFeedback) {
-                        feedbackHtml = `
-                        <div class="mt-6 p-4 bg-red-50 text-red-700 rounded-lg text-center">
-                            <div class="font-bold">Sai rồi!</div>
-                            <div class="text-sm mt-1 text-slate-500">Đáp án: <span class="font-mono font-bold text-slate-800">${smFeedback.split(':')[1]}</span></div>
-                            <button onclick="startSM()" class="mt-3 px-4 py-2 bg-slate-800 text-white text-sm rounded shadow">Thử lại</button>
+                    let fbHtml = '';
+                    if(smFeedback === 'correct') fbHtml = `<div class="mt-8 p-4 bg-green-100 text-green-700 rounded-xl font-bold text-center animate-bounce">✨ Chính xác!</div>`;
+                    else if(smFeedback) fbHtml = `
+                        <div class="mt-8 p-6 bg-white border border-red-100 shadow-lg rounded-2xl text-center animate-shake">
+                            <div class="text-red-600 font-bold text-lg mb-1">Sai rồi!</div>
+                            <div class="text-slate-400 text-sm">Đáp án: <span class="font-mono font-bold text-slate-800 text-xl">${smFeedback.split(':')[1]}</span></div>
+                            <button onclick="startSM()" class="mt-4 px-6 py-2 bg-slate-800 text-white rounded-lg font-bold active:bg-slate-900">Thử lại</button>
                         </div>`;
-                    }
 
                     html = `
-                    <div class="max-w-2xl mx-auto">
-                        <div class="flex justify-between items-center mb-4">
-                            <button onclick="goHome()" class="text-slate-500 font-bold text-sm">← Thoát</button>
-                            <span class="text-xs font-bold bg-slate-100 px-2 py-1 rounded text-slate-600">Level: ${sm.count}</span>
+                    <div class="max-w-2xl mx-auto w-full mt-4">
+                        <div class="flex justify-between items-center mb-6">
+                            <button onclick="goHome()" class="text-slate-400 font-bold text-sm hover:text-slate-600">← Thoát</button>
+                            <span class="text-xs font-bold bg-white border px-3 py-1 rounded-full text-slate-500">Level ${sm.count}</span>
                         </div>
-                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-10">
-                            <p class="text-center text-slate-500 text-sm mb-6">Nhập lại dãy số</p>
-                            <div class="flex flex-wrap justify-center gap-2 md:gap-4">
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 md:p-12 flex flex-col items-center">
+                            <p class="text-slate-400 text-xs font-bold uppercase mb-6 tracking-wider">Nhập dãy số</p>
+                            <div class="flex flex-wrap justify-center gap-3">
                                 ${Array(sm.count).fill('').map((_, i) => `
-                                    <input data-type="sm" data-idx="${i}" value="${sm.input[i]||''}" type="tel" maxlength="1" 
-                                    class="number-box w-10 h-14 md:w-14 md:h-16 text-2xl md:text-3xl text-center font-bold rounded-lg border border-slate-300 bg-slate-50 text-slate-800 placeholder-transparent focus:bg-white"
+                                    <input data-type="sm" data-idx="${i}" value="${sm.input[i]||''}" type="tel" pattern="[0-9]*" maxlength="1" 
+                                    class="number-box w-12 h-16 md:w-16 md:h-20 text-3xl md:text-4xl text-center font-bold bg-slate-50 border border-slate-200 text-slate-800 placeholder-transparent caret-primary-600"
                                     ${smFeedback?'disabled':''}>
                                 `).join('')}
                             </div>
-                            ${feedbackHtml}
+                            ${fbHtml}
                         </div>
                     </div>`;
                 }
@@ -176,16 +171,16 @@
             // 3. LONG MEMORY CONFIG
             else if(activeView === 'lm_cfg') {
                 html = `
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 max-w-md mx-auto">
-                    <h2 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Cấu hình bài tập</h2>
-                    <div class="space-y-4">
-                        <div><label class="text-sm font-semibold text-slate-600 block mb-1">Thời gian nhớ (phút)</label><input id="lm-mem" type="number" value="5" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-800 focus:border-primary-600 outline-none"></div>
-                        <div><label class="text-sm font-semibold text-slate-600 block mb-1">Thời gian trả lời (phút)</label><input id="lm-ans" type="number" value="5" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-800 focus:border-primary-600 outline-none"></div>
-                        <div><label class="text-sm font-semibold text-slate-600 block mb-1">Số dòng (40 số/dòng)</label><input id="lm-cnt" type="number" value="2" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-800 focus:border-primary-600 outline-none"></div>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 max-w-md mx-auto mt-6">
+                    <h2 class="text-xl font-bold text-slate-800 mb-6">Cấu hình bài tập</h2>
+                    <div class="space-y-5">
+                        <div><label class="text-xs font-bold text-slate-500 uppercase block mb-2">Thời gian nhớ (phút)</label><input id="lm-mem" type="number" value="5" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:border-primary-600 outline-none text-lg"></div>
+                        <div><label class="text-xs font-bold text-slate-500 uppercase block mb-2">Thời gian trả lời (phút)</label><input id="lm-ans" type="number" value="5" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:border-primary-600 outline-none text-lg"></div>
+                        <div><label class="text-xs font-bold text-slate-500 uppercase block mb-2">Số dòng (40 số/dòng)</label><input id="lm-cnt" type="number" value="2" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:border-primary-600 outline-none text-lg"></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 mt-6">
-                        <button onclick="goHome()" class="py-2.5 rounded-lg font-bold text-slate-600 border border-slate-200 hover:bg-slate-50">Hủy</button>
-                        <button onclick="startLM()" class="py-2.5 rounded-lg font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm">Bắt đầu</button>
+                    <div class="grid grid-cols-2 gap-4 mt-8">
+                        <button onclick="goHome()" class="py-3 rounded-xl font-bold text-slate-600 bg-slate-50 hover:bg-slate-100">Hủy</button>
+                        <button onclick="startLM()" class="py-3 rounded-xl font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-md shadow-blue-200">Bắt đầu</button>
                     </div>
                 </div>`;
             }
@@ -193,29 +188,29 @@
             // 4. LONG MEMORY - MEMORIZE
             else if(activeView === 'lm_mem') {
                 const rows = lm.lines.map((line, i) => `
-                    <div class="bg-white rounded-xl border border-slate-200 p-3 md:p-4 mb-3 shadow-sm relative cursor-pointer hover:border-primary-400" onclick="toggleMask(${i})">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-bold">Dòng ${i+1}</span>
-                            <span class="text-slate-300 text-xs uppercase font-bold tracking-wider">${lm.mask[i] ? 'Đã che' : 'Chạm để che'}</span>
+                    <div class="bg-white rounded-xl border border-slate-200 p-4 mb-3 shadow-sm active:scale-[0.99] transition-transform" onclick="toggleMask(${i})">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-[10px] font-bold uppercase">Dòng ${i+1}</span>
+                            ${lm.mask[i] ? '<span class="text-xs font-bold text-slate-400 flex items-center gap-1">👁️ Đã che</span>' : ''}
                         </div>
-                        <div id="row-${i}" class="font-mono text-lg md:text-xl text-slate-800 leading-relaxed break-all tracking-wide ${lm.mask[i]?'blur-content':''} transition-all">
+                        <div id="row-${i}" class="font-mono text-xl md:text-2xl text-slate-800 leading-relaxed break-all tracking-wide ${lm.mask[i]?'blur-content':''} transition-all duration-200 select-none">
                             ${grp(line)}
                         </div>
                     </div>
                 `).join('');
 
                 html = `
-                <div class="flex flex-col h-[calc(100vh-80px)]">
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center mb-3 sticky top-0 z-10">
-                        <div>
-                            <div class="text-[10px] font-bold text-slate-400 uppercase">Thời gian còn</div>
-                            <div id="timer" class="font-mono text-2xl font-bold text-slate-800 leading-none">${fmtTime(lm.timer)}</div>
+                <div class="flex flex-col h-full">
+                    <div class="sticky top-0 z-20 bg-[#f8fafc] pb-4 pt-2">
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center">
+                            <div>
+                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Thời gian còn</div>
+                                <div id="timer" class="font-mono text-2xl font-bold text-slate-800 leading-none">${fmtTime(lm.timer)}</div>
+                            </div>
+                            <button onclick="lmPhase2()" class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm active:bg-primary-700">Trả lời ngay</button>
                         </div>
-                        <button onclick="lmPhase2()" class="bg-primary-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm">Trả lời ➜</button>
                     </div>
-                    <div class="flex-1 overflow-y-auto pb-20 space-y-2">
-                        ${rows}
-                    </div>
+                    <div class="flex-1 pb-10 space-y-2">${rows}</div>
                 </div>`;
             }
 
@@ -223,79 +218,70 @@
             else if(activeView === 'lm_ans') {
                 const rows = lm.inputs.map((_, r) => `
                     <div class="bg-white rounded-xl border border-slate-200 p-3 mb-3 shadow-sm">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-bold text-slate-500">DÒNG ${r+1}</span>
-                            <span id="prog-${r}" class="text-xs font-bold text-slate-300">0/40</span>
+                        <div class="flex justify-between items-center mb-2 px-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Dòng ${r+1}</span>
+                            <span id="prog-${r}" class="text-[10px] font-bold text-slate-300">0/40</span>
                         </div>
                         <div class="grid-inputs">
                             ${Array(40).fill('').map((_, c) => `
-                                <input data-type="lm" data-r="${r}" data-c="${c}" value="${lm.inputs[r][c]}" type="tel" maxlength="1"
-                                class="number-box h-10 md:h-12 text-center font-mono text-lg md:text-xl font-bold bg-slate-50 border border-slate-200 rounded text-slate-900 focus:bg-white p-0">
+                                <input data-type="lm" data-r="${r}" data-c="${c}" value="${lm.inputs[r][c]}" type="tel" pattern="[0-9]*" maxlength="1"
+                                class="number-box h-10 md:h-12 text-center font-mono text-lg md:text-xl font-bold bg-slate-50 border border-slate-200 text-slate-900 p-0">
                             `).join('')}
                         </div>
                     </div>
                 `).join('');
 
                 html = `
-                <div class="flex flex-col h-[calc(100vh-80px)]">
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center mb-3 sticky top-0 z-10">
-                        <div>
-                            <div class="text-[10px] font-bold text-slate-400 uppercase">Thời gian trả lời</div>
-                            <div id="timer" class="font-mono text-2xl font-bold text-slate-800 leading-none">${fmtTime(lm.timer)}</div>
+                <div class="flex flex-col h-full">
+                    <div class="sticky top-0 z-20 bg-[#f8fafc] pb-4 pt-2">
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center">
+                             <div>
+                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Thời gian trả lời</div>
+                                <div id="timer" class="font-mono text-2xl font-bold text-slate-800 leading-none">${fmtTime(lm.timer)}</div>
+                            </div>
+                            <button onclick="lmScore()" class="bg-green-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm active:bg-green-700">Nộp bài ✓</button>
                         </div>
-                        <button onclick="lmScore()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm">Nộp bài ✓</button>
                     </div>
-                    <div class="flex-1 overflow-y-auto pb-20">
-                        ${rows}
-                    </div>
+                    <div class="flex-1 pb-10">${rows}</div>
                 </div>`;
             }
 
-            // 6. LONG MEMORY - RESULT
+            // 6. RESULT
             else if(activeView === 'lm_res') {
                 let totalC = 0, totalT = 0;
                 const details = lm.lines.map((line, i) => {
                     const u = lm.inputs[i].join('');
                     totalT += 40;
-                    
-                    // Simple scoring calc for display
-                    let lineScore = 0;
+                    let ls = 0; // line score
                     if(i < lm.lines.length - 1) { // strict
-                        let diff = Math.abs(line.length - u.length);
-                        for(let k=0; k<Math.min(line.length, u.length); k++) if(u[k]!==line[k]) diff++;
-                        if(diff===0) lineScore=40; else if(diff===1) lineScore=20;
-                    } else { // last line
-                        let diff = 0, len = u.trim().length;
-                        for(let k=0; k<Math.min(len, line.length); k++) if(u[k]!==line[k]) diff++;
-                        if(diff===0 && len>0) lineScore=len; else if(diff===1 && len>0) lineScore=Math.ceil(len/2);
+                        let d = Math.abs(line.length - u.length);
+                        for(let k=0; k<Math.min(line.length, u.length); k++) if(u[k]!==line[k]) d++;
+                        if(d===0) ls=40; else if(d===1) ls=20;
+                    } else { // loose
+                        let d = 0, len = u.trim().length;
+                        for(let k=0; k<Math.min(len, line.length); k++) if(u[k]!==line[k]) d++;
+                        if(d===0 && len>0) ls=len; else if(d===1 && len>0) ls=Math.ceil(len/2);
                     }
-                    totalC += lineScore;
+                    totalC += ls;
 
-                    // Generate diff view
                     let htmlRes = '';
                     for(let k=0; k<line.length; k++) {
                         if(k < u.length) htmlRes += `<span class="${u[k]===line[k]?'char-correct':'char-incorrect'}">${line[k]}</span>`;
                         else htmlRes += `<span class="char-missing">${line[k]}</span>`;
-                        if((k+1)%2===0) htmlRes += ' '; // space every 2 chars
+                        if((k+1)%2===0) htmlRes += ' ';
                     }
                     if(u.length > line.length) htmlRes += `<span class="char-incorrect">${u.substring(line.length)}</span>`;
 
                     return `
                     <div class="bg-white p-4 rounded-xl border border-slate-200 mb-4 shadow-sm">
-                        <div class="text-xs font-bold text-slate-500 mb-2 border-b pb-1">DÒNG ${i+1} (${lineScore}/40)</div>
-                        <div class="grid gap-2 text-sm md:text-base">
-                            <div>
-                                <div class="text-[10px] font-bold text-slate-400 uppercase">Đáp án</div>
-                                <div class="font-mono text-slate-500 break-all">${grp(line)}</div>
-                            </div>
-                            <div>
-                                <div class="text-[10px] font-bold text-slate-400 uppercase">Bạn nhập</div>
-                                <div class="font-mono text-slate-800 break-all font-bold">${grp(u)||'-'}</div>
-                            </div>
-                            <div>
-                                <div class="text-[10px] font-bold text-slate-400 uppercase">So sánh</div>
-                                <div class="font-mono bg-slate-50 p-2 rounded border border-slate-100 break-all leading-relaxed">${htmlRes}</div>
-                            </div>
+                        <div class="text-xs font-bold text-slate-500 mb-2 pb-2 border-b border-slate-100 flex justify-between">
+                            <span>DÒNG ${i+1}</span>
+                            <span class="${ls===40?'text-green-600':'text-slate-400'}">${ls}/40 điểm</span>
+                        </div>
+                        <div class="space-y-2 font-mono text-sm md:text-base">
+                            <div><span class="text-[10px] font-bold text-slate-400 uppercase block">Gốc</span><div class="text-slate-500 break-all">${grp(line)}</div></div>
+                            <div><span class="text-[10px] font-bold text-slate-400 uppercase block">Bạn</span><div class="text-slate-800 break-all font-bold">${grp(u)||'-'}</div></div>
+                            <div><span class="text-[10px] font-bold text-slate-400 uppercase block">Check</span><div class="bg-slate-50 p-2 rounded border border-slate-100 break-all leading-relaxed">${htmlRes}</div></div>
                         </div>
                     </div>`;
                 }).join('');
@@ -304,14 +290,14 @@
                 const color = pct>=50 ? 'text-green-600' : 'text-red-600';
 
                 html = `
-                <div class="max-w-3xl mx-auto pb-10">
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center mb-6">
-                        <h2 class="text-lg font-bold text-slate-800 uppercase tracking-widest mb-2">Kết Quả</h2>
-                        <div class="text-5xl font-black ${color} mb-1">${pct}%</div>
-                        <div class="text-slate-500 font-bold">${totalC}/${totalT} điểm</div>
-                        <div class="flex justify-center gap-3 mt-6">
-                            <button onclick="goHome()" class="px-5 py-2 border border-slate-200 rounded-lg font-bold text-slate-600">Menu</button>
-                            <button onclick="startLM()" class="px-5 py-2 bg-primary-600 text-white rounded-lg font-bold shadow">Làm lại</button>
+                <div class="max-w-3xl mx-auto pb-10 mt-4">
+                    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm text-center mb-6">
+                        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">TỔNG KẾT</h2>
+                        <div class="text-6xl font-black ${color} mb-2 tracking-tight">${pct}%</div>
+                        <div class="text-slate-500 font-bold text-lg">${totalC} / ${totalT} điểm</div>
+                        <div class="flex justify-center gap-3 mt-8">
+                            <button onclick="goHome()" class="px-6 py-3 border border-slate-200 rounded-xl font-bold text-slate-600 bg-slate-50">Menu</button>
+                            <button onclick="startLM()" class="px-6 py-3 bg-primary-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200">Làm lại</button>
                         </div>
                     </div>
                     ${details}
@@ -319,16 +305,14 @@
             }
 
             app.innerHTML = html;
+            // Auto-focus logic
             if(activeView === 'lm_ans') setTimeout(bindInputs, 100);
         }
 
-        // --- LOGIC FUNCTIONS ---
+        // --- LOGIC ---
         function goHome() { stopTimer(); activeView = 'home'; render(); }
         
-        // Short Memory
-        function startSM() { 
-            activeView = 'sm_play'; sm.count=1; sm.streak=0; genSM(); 
-        }
+        function startSM() { activeView = 'sm_play'; sm.count=1; sm.streak=0; genSM(); }
         function genSM() {
             clearTimeout(smTimer);
             smFeedback=''; smShow=true;
@@ -339,7 +323,11 @@
             const wait = Math.max(1000, sm.count*600);
             smTimer = setTimeout(() => {
                 smShow=false; render();
-                setTimeout(() => document.querySelector('input')?.focus(), 50);
+                // MOBILE AUTO-FOCUS FIX
+                setTimeout(() => {
+                    const el = document.querySelector('input[data-idx="0"]');
+                    if(el) { el.focus(); el.click(); }
+                }, 100);
             }, wait);
         }
         function checkSM() {
@@ -351,16 +339,15 @@
                 render();
                 setTimeout(() => { sm.count++; genSM(); }, 1000);
             } else {
-                smFeedback=`inc:${r}`; sm.streak=0; render();
+                smFeedback=`:${r}`; sm.streak=0; render();
             }
         }
 
-        // Long Memory
         function configLM() { activeView='lm_cfg'; render(); }
         function startLM() {
-            lm.config.mem = parseInt(document.getElementById('lm-mem').value);
-            lm.config.ans = parseInt(document.getElementById('lm-ans').value);
-            lm.config.cnt = parseInt(document.getElementById('lm-cnt').value);
+            lm.config.mem = parseInt(document.getElementById('lm-mem').value)||5;
+            lm.config.ans = parseInt(document.getElementById('lm-ans').value)||5;
+            lm.config.cnt = parseInt(document.getElementById('lm-cnt').value)||2;
             lm.lines = Array(lm.config.cnt).fill().map(() => Array.from({length:40}, ()=>Math.floor(Math.random()*10)).join(''));
             lm.mask = {};
             activeView = 'lm_mem';
@@ -371,7 +358,11 @@
         function toggleMask(i) {
             lm.mask[i] = !lm.mask[i];
             const el = document.getElementById(`row-${i}`);
-            if(el) el.classList.toggle('blur-content');
+            if(el) {
+                el.classList.toggle('blur-content');
+                // Re-render parent to update label, but keep it simple for now just toggle class
+                render(); 
+            }
         }
         function lmPhase2() {
             stopTimer();
@@ -381,13 +372,8 @@
             startTimer(() => { lmScore(); });
             render();
         }
-        function lmScore() {
-            stopTimer();
-            activeView = 'lm_res';
-            render();
-        }
+        function lmScore() { stopTimer(); activeView = 'lm_res'; render(); }
 
-        // Common
         function startTimer(cb) {
             if(lm.timerId) clearInterval(lm.timerId);
             lm.timerId = setInterval(() => {
@@ -405,20 +391,22 @@
         // --- EVENTS ---
         document.addEventListener('input', e => {
             const t = e.target;
+            // Short Memory Input
             if(t.dataset.type === 'sm') {
                 const i = parseInt(t.dataset.idx);
                 sm.input[i] = t.value;
                 if(t.value && i < sm.count-1) document.querySelector(`input[data-idx="${i+1}"]`).focus();
                 if(sm.input.join('').length === sm.count) checkSM();
             }
+            // Long Memory Input
             if(t.dataset.type === 'lm') {
                 const r = parseInt(t.dataset.r), c = parseInt(t.dataset.c);
                 lm.inputs[r][c] = t.value;
-                // update prog
+                // update prog label
                 const f = lm.inputs[r].filter(x=>x).length;
                 const p = document.getElementById(`prog-${r}`);
-                if(p) { p.innerText = `${f}/40`; p.className = f===40?'text-xs font-bold text-green-600':'text-xs font-bold text-slate-300'; }
-                // jump
+                if(p) { p.innerText = `${f}/40`; p.className = f===40?'text-[10px] font-bold text-green-600':'text-[10px] font-bold text-slate-300'; }
+                // auto jump
                 if(t.value) {
                     if(c < 39) document.querySelector(`input[data-r="${r}"][data-c="${c+1}"]`)?.focus();
                     else document.querySelector(`input[data-r="${r+1}"][data-c="0"]`)?.focus();
@@ -427,7 +415,7 @@
         });
 
         function bindInputs() {
-            // Add arrow navigation if needed, mainly handled by browser default + auto jump above
+            // Helper to bind arrow keys if needed, but auto-jump handles most
         }
 
         // Init
