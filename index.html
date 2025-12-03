@@ -4,68 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Memory Pro Mobile</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['Roboto Mono', 'monospace'],
-                    },
-                    colors: {
-                        primary: { 600: '#2563eb', 700: '#1d4ed8' } // Royal Blue
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['Roboto Mono', 'monospace'] },
+                    colors: { primary: { 600: '#2563eb', 700: '#1d4ed8' } }
                 }
             }
         }
     </script>
     <style>
-        /* Nền chống chói, bảo vệ mắt */
-        body { background-color: #f8fafc; color: #334155; }
-        
-        /* Input tối ưu cảm ứng */
-        .number-box {
-            transition: all 0.15s;
-            -webkit-appearance: none;
-            margin: 0;
-            border-radius: 8px;
-        }
-        .number-box:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-            outline: none;
-            background-color: #fff;
-            transform: scale(1.05);
-            z-index: 10;
-        }
-
-        /* Màu kết quả */
+        body { background-color: #f8fafc; color: #334155; touch-action: manipulation; }
+        .number-box { transition: all 0.15s; -webkit-appearance: none; border-radius: 8px; }
+        .number-box:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); outline: none; background-color: #fff; transform: scale(1.05); z-index: 10; }
         .char-correct { color: #15803d; font-weight: 700; }
         .char-incorrect { color: #b91c1c; text-decoration: line-through; opacity: 0.8; }
         .char-missing { background-color: #fef3c7; color: #b45309; }
-
-        /* Hiệu ứng che mờ */
         .blur-content { opacity: 0.15; filter: blur(5px); user-select: none; }
-        
-        /* Lưới nhập liệu thông minh trên mobile */
-        .grid-inputs {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
-            gap: 6px;
-        }
-        @media (min-width: 640px) {
-            .grid-inputs { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; }
-        }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 6px; }
+        @media (min-width: 640px) { .grid-inputs { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; } }
     </style>
 </head>
 <body class="antialiased pb-10 min-h-screen flex flex-col">
 
-    <!-- Header -->
     <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 h-14 flex-none shadow-sm">
         <div class="container mx-auto px-4 h-full flex items-center justify-between max-w-4xl">
             <div class="flex items-center gap-2 cursor-pointer active:opacity-70" onclick="window.location.reload()">
@@ -77,37 +42,24 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main id="app" class="container mx-auto px-3 py-6 max-w-4xl flex-1 flex flex-col"></main>
 
     <script>
         // --- STATE ---
         let activeView = 'home'; 
-        
-        // Short Memory State
         let sm = { data: [], input: [], count: 1, streak: 0, best: parseInt(localStorage.getItem('best_sm')||0) };
         let smTimer = null;
         let smFeedback = '';
         let smShow = false;
-
-        // Long Memory State
-        let lm = { 
-            lines: [], inputs: [], mask: {}, 
-            config: { mem: 5, ans: 5, cnt: 2 },
-            timer: 0, timerId: null
-        };
-
+        let lm = { lines: [], inputs: [], mask: {}, config: { mem: 5, ans: 5, cnt: 2 }, timer: 0, timerId: null };
         const app = document.getElementById('app');
-
-        // --- UTILS ---
         const fmtTime = s => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-        const grp = s => s ? s.match(/.{1,2}/g).join(' ') : ''; // Nhóm 2 số
+        const grp = s => s ? s.match(/.{1,2}/g).join(' ') : '';
 
         // --- RENDERER ---
         function render() {
             let html = '';
 
-            // 1. HOME SCREEN
             if(activeView === 'home') {
                 html = `
                 <div class="grid gap-4 md:grid-cols-2 animate-fade-in mt-4">
@@ -126,11 +78,10 @@
                 </div>`;
             }
 
-            // 2. SHORT MEMORY
             else if(activeView === 'sm_play') {
                 if(smShow) {
-                    // Logic chỉnh cỡ chữ thông minh để không bị tràn màn hình
-                    let textSize = 'text-7xl'; // Mặc định cực lớn
+                    // Logic chỉnh cỡ chữ thông minh
+                    let textSize = 'text-7xl'; 
                     if(sm.count > 25) textSize = 'text-2xl';
                     else if(sm.count > 15) textSize = 'text-3xl';
                     else if(sm.count > 8) textSize = 'text-5xl';
@@ -138,12 +89,9 @@
                     html = `
                     <div class="flex-1 flex flex-col items-center justify-center min-h-[60vh] px-4">
                         <div class="text-slate-400 text-xs font-bold uppercase mb-8 tracking-[0.2em]">GHI NHỚ</div>
-                        
-                        <!-- Vùng hiển thị số: break-words để tự xuống dòng -->
                         <div class="${textSize} font-mono font-bold text-slate-800 tracking-widest select-none drop-shadow-sm text-center w-full break-words leading-relaxed">
                             ${sm.data.join('')}
                         </div>
-
                         <div class="mt-12 w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden flex-none">
                             <div class="h-full bg-primary-600 animate-[width_linear_forwards]" style="width:100%; animation-duration:${Math.max(1, sm.count*0.6)}s"></div>
                         </div>
@@ -158,6 +106,14 @@
                             <button onclick="startSM()" class="mt-4 px-6 py-2 bg-slate-800 text-white rounded-lg font-bold active:bg-slate-900">Thử lại</button>
                         </div>`;
 
+                    // Input đầu tiên có autofocus
+                    const inputs = Array(sm.count).fill('').map((_, i) => `
+                        <input data-type="sm" data-idx="${i}" value="${sm.input[i]||''}" type="tel" pattern="[0-9]*" maxlength="1" 
+                        ${i===0 ? 'autofocus' : ''} 
+                        class="number-box w-12 h-16 md:w-16 md:h-20 text-3xl md:text-4xl text-center font-bold bg-slate-50 border border-slate-200 text-slate-800 placeholder-transparent caret-primary-600"
+                        ${smFeedback?'disabled':''}>
+                    `).join('');
+
                     html = `
                     <div class="max-w-2xl mx-auto w-full mt-4">
                         <div class="flex justify-between items-center mb-6">
@@ -167,11 +123,7 @@
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-10 flex flex-col items-center">
                             <p class="text-slate-400 text-xs font-bold uppercase mb-6 tracking-wider">Nhập dãy số</p>
                             <div class="flex flex-wrap justify-center gap-3">
-                                ${Array(sm.count).fill('').map((_, i) => `
-                                    <input data-type="sm" data-idx="${i}" value="${sm.input[i]||''}" type="tel" pattern="[0-9]*" maxlength="1" 
-                                    class="number-box w-12 h-16 md:w-16 md:h-20 text-3xl md:text-4xl text-center font-bold bg-slate-50 border border-slate-200 text-slate-800 placeholder-transparent caret-primary-600"
-                                    ${smFeedback?'disabled':''}>
-                                `).join('')}
+                                ${inputs}
                             </div>
                             ${fbHtml}
                         </div>
@@ -179,7 +131,6 @@
                 }
             }
 
-            // 3. LONG MEMORY CONFIG
             else if(activeView === 'lm_cfg') {
                 html = `
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 max-w-md mx-auto mt-6">
@@ -196,7 +147,6 @@
                 </div>`;
             }
 
-            // 4. LONG MEMORY - MEMORIZE
             else if(activeView === 'lm_mem') {
                 const rows = lm.lines.map((line, i) => `
                     <div class="bg-white rounded-xl border border-slate-200 p-4 mb-3 shadow-sm active:scale-[0.99] transition-transform" onclick="toggleMask(${i})">
@@ -225,7 +175,6 @@
                 </div>`;
             }
 
-            // 5. LONG MEMORY - ANSWER
             else if(activeView === 'lm_ans') {
                 const rows = lm.inputs.map((_, r) => `
                     <div class="bg-white rounded-xl border border-slate-200 p-3 mb-3 shadow-sm">
@@ -257,18 +206,17 @@
                 </div>`;
             }
 
-            // 6. RESULT
             else if(activeView === 'lm_res') {
                 let totalC = 0, totalT = 0;
                 const details = lm.lines.map((line, i) => {
                     const u = lm.inputs[i].join('');
                     totalT += 40;
-                    let ls = 0; // line score
-                    if(i < lm.lines.length - 1) { // strict
+                    let ls = 0; 
+                    if(i < lm.lines.length - 1) { 
                         let d = Math.abs(line.length - u.length);
                         for(let k=0; k<Math.min(line.length, u.length); k++) if(u[k]!==line[k]) d++;
                         if(d===0) ls=40; else if(d===1) ls=20;
-                    } else { // loose (last line)
+                    } else { 
                         let d = 0, len = u.trim().length;
                         for(let k=0; k<Math.min(len, line.length); k++) if(u[k]!==line[k]) d++;
                         if(d===0 && len>0) ls=len; else if(d===1 && len>0) ls=Math.ceil(len/2);
@@ -316,7 +264,6 @@
             }
 
             app.innerHTML = html;
-            // Auto-focus logic for Long Memory Answer phase
             if(activeView === 'lm_ans') setTimeout(bindInputs, 100);
         }
 
@@ -335,14 +282,14 @@
             smTimer = setTimeout(() => {
                 smShow=false; render();
                 
-                // FIX MOBILE KEYBOARD AUTO-FOCUS
+                // FORCE KEYBOARD ON MOBILE
                 setTimeout(() => {
                     const el = document.querySelector('input[data-idx="0"]');
                     if(el) { 
                         el.focus(); 
-                        el.click(); // Trigger ảo để bật bàn phím iOS
+                        el.click(); // Trick cho iOS
                     }
-                }, 100); 
+                }, 150); // Delay một chút để đảm bảo DOM đã sẵn sàng
             }, wait);
         }
         function checkSM() {
@@ -405,22 +352,18 @@
         // --- EVENTS ---
         document.addEventListener('input', e => {
             const t = e.target;
-            // Short Memory Input
             if(t.dataset.type === 'sm') {
                 const i = parseInt(t.dataset.idx);
                 sm.input[i] = t.value;
                 if(t.value && i < sm.count-1) document.querySelector(`input[data-idx="${i+1}"]`).focus();
                 if(sm.input.join('').length === sm.count) checkSM();
             }
-            // Long Memory Input
             if(t.dataset.type === 'lm') {
                 const r = parseInt(t.dataset.r), c = parseInt(t.dataset.c);
                 lm.inputs[r][c] = t.value;
-                // update prog label
                 const f = lm.inputs[r].filter(x=>x).length;
                 const p = document.getElementById(`prog-${r}`);
                 if(p) { p.innerText = `${f}/40`; p.className = f===40?'text-[10px] font-bold text-green-600':'text-[10px] font-bold text-slate-300'; }
-                // auto jump
                 if(t.value) {
                     if(c < 39) document.querySelector(`input[data-r="${r}"][data-c="${c+1}"]`)?.focus();
                     else document.querySelector(`input[data-r="${r+1}"][data-c="0"]`)?.focus();
