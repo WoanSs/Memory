@@ -3,1063 +3,496 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Memory Master Pro</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts - Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Space Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: { 500: '#6366f1', 600: '#4f46e5' },
+                        accent: { 500: '#ec4899', 600: '#db2777' }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
+        /* Animated Background */
         body {
-            font-family: 'Inter', sans-serif;
+            background-color: #f0f9ff;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        /* Custom animation for pulse effect */
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
-        }
-        .animate-pulse {
-            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        /* Styles for result comparison */
-        .char-correct {
-            color: #16a34a; /* green-600 */
-        }
-        .char-incorrect {
-            color: #dc2626; /* red-600 */
-            text-decoration: line-through;
-        }
-        .char-missing {
-            color: #ca8a04; /* yellow-500 */
-            background-color: #fef9c3; /* yellow-100 */
-        }
-        /* New style for individual number boxes - Base styles, responsive sizes handled by Tailwind classes in HTML */
-        .number-box {
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0.125rem; /* Equivalent to m-0.5 */
-            border: 1px solid #d1d5db; /* gray-300 */
-            border-radius: 0.375rem; /* rounded-md */
-            background-color: #f9fafb; /* gray-50 */
-            font-weight: 600; /* font-semibold */
-            color: #4b5563; /* gray-700 */
-        }
-        /* Removed styles for input feedback (green/red borders and backgrounds) */
-        /* .border-input-correct {
-            border-color: #22c55e;
-            background-color: #f0fdf4;
-        }
-        .border-input-incorrect {
-            border-color: #ef4444;
-            background-color: #fef2f2;
-        } */
-        .border-input-default {
-            border-color: #d1d5db; /* gray-300 */
-            background-color: #f9fafb; /* gray-50 */
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
-        /* Modal specific styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+        .number-box {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .modal-content {
-            background-color: #fff;
-            padding: 2rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
-            max-width: 90%;
-            max-height: 90%;
-            overflow-y: auto;
-            position: relative;
+        .number-box:focus {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.2);
+            border-color: #6366f1;
+            outline: none;
+            background: #fff;
         }
-        .modal-close-button {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #4b5563;
-        }
+
+        /* Typography for Numbers */
+        .font-digit { font-family: 'Space Mono', monospace; letter-spacing: -0.02em; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Utilities */
+        .blur-content { filter: blur(8px); opacity: 0.3; user-select: none; }
+        .char-correct { color: #10b981; font-weight: bold; }
+        .char-incorrect { color: #ef4444; text-decoration: line-through; opacity: 0.7; }
+        .char-missing { background-color: #fef3c7; color: #d97706; padding: 0 2px; border-radius: 2px; }
     </style>
 </head>
-<body class="min-h-screen bg-gray-100 text-gray-800 antialiased">
+<body class="text-slate-800 relative selection:bg-indigo-100 selection:text-indigo-700">
 
-    <nav class="bg-gradient-to-r from-blue-600 to-purple-700 p-4 shadow-lg rounded-b-xl mb-6">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 id="app-title" class="text-white text-3xl font-bold font-inter tracking-wide cursor-pointer flex items-center space-x-2">
-                <!-- Brain icon as SVG -->
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-white">
-                  <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06L13.25 10l.8 2.25H21a.75.75 0 0 1 0 1.5h-1.996l.8 2.25h1.196a.75.75 0 0 1 0 1.5h-1.196l-.8 2.25h1.996a.75.75 0 0 1 0 1.5H12.5a.75.75 0 0 1-.75-.75V19.5c0-.621-.504-1.125-1.125-1.125h-1.5c-.621 0-1.125.504-1.125 1.125v.75a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h1.996l-.8-2.25H3a.75.75 0 0 1 0-1.5h1.196l.8-2.25H3a.75.75 0 0 1 0-1.5h1.996l.8-2.25H3a.75.75 0 0 1 0-1.5H10.75l-1.53-4.59a.75.75 0 0 1 0-1.06l3.75-3.75Z" clip-rule="evenodd" />
-                </svg>
-                <span>Memory</span>
-            </h1>
-            <!-- Removed the nav-exercise button, no other buttons needed here -->
-            <div></div> <!-- Empty div to maintain flex spacing if needed, or remove flex parent -->
+    <!-- Background Blobs Decoration -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div class="absolute top-0 right-1/4 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-32 left-1/3 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="sticky top-4 z-50 px-4 mb-8">
+        <div class="glass-panel container mx-auto max-w-5xl h-16 rounded-2xl flex items-center justify-between px-6 shadow-sm/50">
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="window.location.reload()">
+                <div class="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30 group-hover:scale-105 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight text-slate-900">Brain<span class="text-brand-600">Train</span></h1>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pro Edition</p>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <main id="app-content" class="container mx-auto p-4 md:p-6 lg:p-8">
-        <!-- Content will be loaded here by JavaScript -->
-    </main>
-
-    <!-- Help Modal Structure -->
-    <div id="help-modal-overlay" class="modal-overlay hidden">
-        <div id="help-modal-content" class="modal-content">
-            <button id="help-modal-close" class="modal-close-button">&times;</button>
-            <h3 id="help-modal-title" class="text-3xl font-bold text-blue-700 mb-4"></h3>
-            <div id="help-modal-body" class="text-gray-700 leading-relaxed">
-                <!-- Help content will be injected here -->
-            </div>
-        </div>
-    </div>
+    <!-- Main Content -->
+    <main id="app-content" class="container mx-auto px-4 pb-12 max-w-5xl"></main>
 
     <script>
-        // --- Global State Variables ---
-        // Changed initial page to 'exercise' to make it the main landing page
-        let currentPage = 'exercise';
-        let isExerciseActive = false;
-        // 'none' | 'shortMemory' | 'longMemoryConfig' | 'longMemoryPlaying' | 'longMemoryAnswering' | 'longMemoryScored'
-        let activeExerciseType = 'none';
+        // --- STATE MANAGEMENT ---
+        let activeType = 'none'; 
 
-        // Short Memory State
-        let numbers = [];
-        let shortMemoryUserInput = []; 
-        let feedback = '';
-        let showNumbers = false;
-        let currentStreakLength = 0;
-        let highestStreakLengthEver = 0;
-        let digitCount = 1;
-        let exerciseHistory = []; // Kept for potential future use or if user changes mind
-        let currentTimeoutId = null; // To clear timeouts for short memory display
+        // Short Memory
+        let shortData = { nums: [], input: [], digit: 1, streak: 0, best: parseInt(localStorage.getItem('best_s')||0) };
+        let shortTimer = null;
+        let shortFeedback = '';
+        let showShort = false;
 
-        // Long Memory State
-        let longMemoryData = [];
-        let longMemoryUserInput = [];
-        let longMemoryScore = { correct: 0, total: 0 };
-        let longMemoryConfig = { memorizeTime: 5, answerTime: 3, numLines: 10 }; // Default values
-        let longMemoryTimeRemaining = 0;
-        let answerTimeRemaining = 0;
-        let currentLongMemoryTimerIntervalId = null; // To clear intervals for long memory countdown
-        let currentAnswerTimerIntervalId = null; // To clear intervals for long memory answer countdown
+        // Long Memory
+        let longData = { lines: [], input: [], score: {c:0, t:0}, mask: {} };
+        let longConfig = { mem: 5, ans: 5, count: 2 };
+        let timer = { val: 0, id: null };
 
-        // --- DOM Elements ---
-        const appTitle = document.getElementById('app-title');
-        // Removed navHome, navTechniques, and navExercise as they are no longer in the HTML
-        const appContent = document.getElementById('app-content');
+        const app = document.getElementById('app-content');
 
-        const helpModalOverlay = document.getElementById('help-modal-overlay');
-        const helpModalTitle = document.getElementById('help-modal-title');
-        const helpModalBody = document.getElementById('help-modal-body');
-        const helpModalCloseBtn = document.getElementById('help-modal-close');
+        // --- UTILS ---
+        const fmtTime = s => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+        const grp2 = s => s ? s.match(/.{1,2}/g).join(' ') : '';
 
+        // --- ACTIONS ---
+        function init() { render(); }
 
-        // --- Local Storage Functions ---
-        /**
-         * Loads the highest streak length ever achieved from local storage.
-         */
-        function loadHighestStreakLengthEver() {
-            const storedScore = localStorage.getItem('highestMemoryStreak');
-            if (storedScore) highestStreakLengthEver = parseInt(storedScore, 10);
+        // Short Memory Actions
+        function startShort() {
+            activeType = 'short';
+            shortData.digit = 1;
+            shortData.streak = 0;
+            genShort();
+        }
+        function genShort() {
+            clearTimeout(shortTimer);
+            shortFeedback = '';
+            shortData.input = Array(shortData.digit).fill('');
+            shortData.nums = Array.from({length: shortData.digit}, () => Math.floor(Math.random()*10));
+            showShort = true;
+            render();
+
+            // Time calculation: 1s base + 0.6s per digit
+            const wait = Math.max(1200, shortData.digit * 650);
+            shortTimer = setTimeout(() => {
+                showShort = false;
+                render();
+                setTimeout(() => document.querySelector('input[data-i="0"]')?.focus(), 50);
+            }, wait);
+        }
+        function checkShort() {
+            const u = shortData.input.join('');
+            const r = shortData.nums.join('');
+            if(u === r) {
+                shortFeedback = 'correct';
+                shortData.streak++;
+                if(shortData.streak > shortData.best) {
+                    shortData.best = shortData.streak;
+                    localStorage.setItem('best_s', shortData.best);
+                }
+                setTimeout(() => { shortData.digit++; genShort(); }, 1000);
+            } else {
+                shortFeedback = `incorrect:${r}`;
+                shortData.streak = 0;
+            }
+            render();
         }
 
-        /**
-         * Saves the current highest streak length to local storage.
-         */
-        function saveHighestStreakLengthEver() {
-            localStorage.setItem('highestMemoryStreak', highestStreakLengthEver);
+        // Long Memory Actions
+        function configLong() { activeType = 'longCfg'; render(); }
+        function startLong() {
+            longConfig.mem = parseInt(document.getElementById('i-mem').value);
+            longConfig.ans = parseInt(document.getElementById('i-ans').value);
+            longConfig.count = parseInt(document.getElementById('i-cnt').value);
+            
+            longData.lines = Array(longConfig.count).fill().map(() => 
+                Array.from({length:40}, () => Math.floor(Math.random()*10)).join('')
+            );
+            longData.mask = {};
+            
+            activeType = 'longMem';
+            timer.val = longConfig.mem * 60;
+            runTimer(() => { activeType = 'longAns'; prepAns(); });
+            render();
+        }
+        function prepAns() {
+            longData.input = Array(longConfig.count).fill().map(() => Array(40).fill(''));
+            timer.val = longConfig.ans * 60;
+            runTimer(() => scoreLong());
+            render();
+            setTimeout(bindNav, 100);
+        }
+        function scoreLong() {
+            clearInterval(timer.id);
+            let earn = 0, poss = 0;
+            longData.lines.forEach((row, i) => {
+                poss += 40;
+                const u = longData.input[i].join('');
+                let lineS = 0;
+                if(i < longData.lines.length - 1) {
+                    let d = Math.abs(row.length - u.length);
+                    for(let k=0; k<Math.min(row.length, u.length); k++) if(u[k]!==row[k]) d++;
+                    if(d===0) lineS=40; else if(d===1) lineS=20;
+                } else {
+                    let d = 0, len = u.trim().length;
+                    for(let k=0; k<Math.min(len, row.length); k++) if(u[k]!==row[k]) d++;
+                    if(d===0 && len>0) lineS=len; else if(d===1 && len>0) lineS=Math.ceil(len/2);
+                }
+                earn += lineS;
+            });
+            longData.score = {c: earn, t: poss};
+            activeType = 'longRes';
+            render();
+        }
+        function toggleMask(i) {
+            longData.mask[i] = !longData.mask[i];
+            const el = document.getElementById(`r-${i}`);
+            const ic = document.getElementById(`icon-${i}`);
+            if(longData.mask[i]) {
+                el.classList.add('blur-content');
+                ic.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />`;
+            } else {
+                el.classList.remove('blur-content');
+                ic.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />`;
+            }
+        }
+        function runTimer(cb) {
+            if(timer.id) clearInterval(timer.id);
+            timer.id = setInterval(() => {
+                timer.val--;
+                const el = document.getElementById('timer-txt');
+                if(el) {
+                    el.innerText = fmtTime(timer.val);
+                    if(timer.val<60) el.classList.add('text-red-500', 'animate-pulse');
+                }
+                if(timer.val <= 0) { clearInterval(timer.id); cb(); }
+            }, 1000);
+        }
+        function stop() {
+            clearTimeout(shortTimer);
+            clearInterval(timer.id);
+            activeType = 'none';
+            render();
         }
 
-        /**
-         * Loads the exercise history from local storage.
-         */
-        function loadExerciseHistory() {
-            // History section removed, so this is no longer directly used for display
-            // but keeping the function in case it's needed for other purposes or future features.
-            const storedHistory = localStorage.getItem('memoryExerciseHistory');
-            if (storedHistory) exerciseHistory = JSON.parse(storedHistory);
-        }
+        // --- RENDERER ---
+        function render() {
+            let html = '';
+            
+            // 1. DASHBOARD
+            if(activeType === 'none') {
+                html = `
+                <div class="grid md:grid-cols-2 gap-8 animate-fade-in">
+                    <!-- Card 1 -->
+                    <div class="glass-panel rounded-3xl p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer relative overflow-hidden" onclick="startShort()">
+                        <div class="absolute top-0 right-0 p-32 bg-blue-500/5 rounded-full blur-2xl -mr-16 -mt-16"></div>
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 text-white flex items-center justify-center text-3xl shadow-lg shadow-blue-500/30 mb-6 group-hover:scale-110 transition-transform">⚡</div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">Phản Xạ Nhanh</h2>
+                        <p class="text-slate-500 font-medium mb-6 leading-relaxed">Rèn luyện khả năng ghi nhớ tức thì (Short-term Memory) với chuỗi số ngẫu nhiên.</p>
+                        <div class="flex items-center justify-between pt-6 border-t border-slate-200/50">
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Kỷ lục: <span class="text-blue-600 text-base">${shortData.best}</span></div>
+                            <span class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">➜</span>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="glass-panel rounded-3xl p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer relative overflow-hidden" onclick="configLong()">
+                         <div class="absolute top-0 right-0 p-32 bg-purple-500/5 rounded-full blur-2xl -mr-16 -mt-16"></div>
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 text-white flex items-center justify-center text-3xl shadow-lg shadow-purple-500/30 mb-6 group-hover:scale-110 transition-transform">🧠</div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">Dữ Liệu Lớn</h2>
+                        <p class="text-slate-500 font-medium mb-6 leading-relaxed">Thử thách với ma trận 40 số/dòng. Hỗ trợ Masking, Auto-jump và Chấm điểm chi tiết.</p>
+                        <div class="flex items-center justify-between pt-6 border-t border-slate-200/50">
+                             <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Chế độ: Pro</div>
+                             <span class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors">➜</span>
+                        </div>
+                    </div>
+                </div>`;
+            }
 
-        /**
-         * Saves the current exercise history to local storage.
-         */
-        function saveExerciseHistory() {
-            // History section removed, so this is no longer directly used for display
-            localStorage.setItem('memoryExerciseHistory', JSON.stringify(exerciseHistory));
-        }
-
-        // --- Utility Functions ---
-        /**
-         * Generates a single random character (0-9).
-         * @returns {string} A random digit character.
-         */
-        function generateRandomCharacter() {
-            const chars = '0123456789';
-            return chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-
-        /**
-         * Generates a line of random characters of a specified length.
-         * @param {number} length - The desired length of the line.
-         * @returns {string} A string of random digit characters.
-         */
-        function generateLine(length) {
-            let line = '';
-            for (let i = 0; i < length; i++) line += generateRandomCharacter();
-            return line;
-        }
-
-        /**
-         * Formats a time in seconds into a MM:SS string.
-         * @param {number} seconds - The time in seconds.
-         * @returns {string} Formatted time string (e.g., "05:30").
-         */
-        function formatTime(seconds) {
-            return `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
-        }
-
-        // --- Page Content Definitions ---
-        // Removed HomePageContent and TechniquesPageContent as they are no longer used.
-
-        const ExercisePageContent = () => {
-            let mainContent = '';
-            if (!isExerciseActive) {
-                // Initial exercise selection screen
-                mainContent = `
-                    <div class="bg-white p-8 rounded-xl shadow-xl">
-                        <h2 class="text-4xl font-extrabold text-blue-700 mb-8 text-center">Bài Tập Rèn Luyện Trí Nhớ</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                            <!-- Short Memory Section -->
-                            <div id="short-memory-section" class="p-6 bg-blue-50 rounded-xl shadow-md border border-blue-200 cursor-pointer hover:shadow-lg transition-shadow duration-300">
-                                <h3 class="text-3xl font-bold text-blue-800 mb-4 text-center">Short Memory</h3>
-                                <p class="text-lg leading-relaxed text-gray-700 mb-6 text-center">Rèn luyện khả năng ghi nhớ và tái hiện thông tin trong thời gian ngắn.</p>
-                                <div class="flex justify-center"><button id="start-short-memory-exercise" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">Bắt Đầu</button></div>
-                            </div>
-                            <!-- Long Memory Section -->
-                            <div id="long-memory-section" class="p-6 bg-green-50 rounded-xl shadow-md border border-green-200 cursor-pointer hover:shadow-lg transition-shadow duration-300">
-                                <h3 class="text-3xl font-bold text-green-800 mb-4 text-center">Long Memory</h3>
-                                <p class="text-lg leading-relaxed text-gray-700 text-center mb-6">Củng cố và lưu giữ thông tin trong thời gian dài.</p>
-                                <div class="flex justify-center"><button id="start-long-memory-exercise" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">Bắt Đầu</button></div>
-                            </div>
+            // 2. SHORT MEMORY
+            else if(activeType === 'short') {
+                if(showShort) {
+                    html = `
+                    <div class="glass-panel rounded-3xl shadow-2xl p-12 min-h-[60vh] flex flex-col justify-center items-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent pointer-events-none"></div>
+                        <p class="text-blue-500 text-sm font-black uppercase tracking-[0.3em] mb-8 animate-pulse">GHI NHỚ CHUỖI SỐ</p>
+                        <div class="font-digit text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 drop-shadow-sm tracking-wider select-none">
+                            ${shortData.nums.join('')}
+                        </div>
+                         <div class="mt-16 w-64 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-500 animate-[width_linear] transition-all duration-[${Math.max(1, shortData.digit*0.6)}s]" style="width:0%"></div>
                         </div>
                     </div>`;
-            } else {
-                // Active exercise UI
-                let exerciseUI = '';
-                switch (activeExerciseType) {
-                    case 'shortMemory':
-                        exerciseUI = `
-                            <h2 class="text-4xl font-extrabold text-blue-700 mb-8 text-center">Short Memory</h2>
-                            <p class="text-lg leading-relaxed text-gray-700 mb-6">Luyện tập khả năng ghi nhớ dãy số. Một dãy số với độ dài <b>${digitCount}</b> chữ số sẽ xuất hiện, sau đó biến mất. Hãy cố gắng ghi nhớ và nhập lại.</p>
-                            <div class="text-center mb-6">
-                                <div id="numbers-display" class="text-4xl font-bold text-gray-400 bg-gray-50 py-6 px-10 rounded-lg inline-block shadow-inner">
-                                    ${showNumbers ? numbers.join('') : Array(digitCount).fill('*').join('')}
-                                </div>
-                            </div>
-                            <div class="flex flex-col items-center space-y-4">
-                                <div id="short-memory-input-boxes" class="flex flex-wrap justify-center mt-4 ${showNumbers ? 'hidden' : ''}">
-                                    ${Array(digitCount).fill().map((_, charIndex) => `
-                                        <input type="text"
-                                            data-short-memory-char-index="${charIndex}"
-                                            maxlength="1"
-                                            value="${shortMemoryUserInput[charIndex] || ''}"
-                                            class="number-box w-6 h-6 text-sm sm:w-8 sm:h-8 sm:text-base md:w-10 md:h-10 md:text-xl
-                                                   text-center font-mono border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none
-                                                   border-input-default">
-                                    `).join('')}
-                                </div>
-                                <div class="flex space-x-4 mt-4">
-                                    <button id="check-answer-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg"
-                                        ${showNumbers ? 'disabled' : ''}>Kiểm Tra</button>
-                                    <button id="end-exercise-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full shadow-lg">Kết Thúc</button>
-                                    <button id="help-short-memory-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full shadow-lg">Hướng Dẫn</button>
-                                </div>
-                            </div>
-                            ${feedback ? `<div class="mt-6 text-center text-xl font-semibold ${feedback.includes('Chính xác') ? 'text-green-600' : 'text-red-600'}">${feedback}</div>` : ''}
-                            <div class="mt-2 text-center text-lg font-medium text-gray-600">Độ dài số hiện tại: ${digitCount}</div>
-                            <div class="mt-2 text-center text-lg font-medium text-gray-600">Điểm số cao nhất: ${highestStreakLengthEver}</div>
-                        `;
-                        break;
-                    case 'longMemoryConfig':
-                        exerciseUI = `
-                            <h2 class="text-4xl font-extrabold text-blue-700 mb-8 text-center">Long Memory</h2>
-                            <div class="space-y-6 max-w-md mx-auto text-left">
-                                <div>
-                                    <label for="memorize-time" class="block text-lg font-medium text-gray-700 mb-2">Thời gian nhớ (phút):</label>
-                                    <input type="number" id="memorize-time" value="${longMemoryConfig.memorizeTime}" min="1" class="w-full p-3 border-2 border-green-300 rounded-lg">
-                                </div>
-                                <div>
-                                    <label for="answer-time" class="block text-lg font-medium text-gray-700 mb-2">Thời gian trả lời (phút):</label>
-                                    <input type="number" id="answer-time" value="${longMemoryConfig.answerTime}" min="1" class="w-full p-3 border-2 border-green-300 rounded-lg">
-                                </div>
-                                <div>
-                                    <label for="num-lines" class="block text-lg font-medium text-gray-700 mb-2">Số dòng dữ liệu (mỗi dòng 40 ký tự):</label>
-                                    <input type="number" id="num-lines" value="${longMemoryConfig.numLines}" min="1" class="w-full p-3 border-2 border-green-300 rounded-lg">
-                                </div>
-                                <div class="flex justify-center space-x-4 pt-4">
-                                    <button id="start-long-memory-game-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg">Bắt Đầu</button>
-                                    <button id="cancel-long-memory-config-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-8 rounded-full shadow-lg">Hủy</button>
-                                    <button id="help-long-memory-config-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full shadow-lg">Hướng Dẫn</button>
-                                </div>
-                            </div>`;
-                        break;
-                    case 'longMemoryPlaying':
-                         exerciseUI = `
-                            <h2 class="text-4xl font-extrabold text-blue-700 mb-4 text-center">Long Memory</h2>
-                            <p class="text-lg text-gray-600 mb-4 text-center">Cố gắng ghi nhớ các dòng dữ liệu sau đây.</p>
-                            <div class="text-center mb-4"><span class="text-4xl font-bold text-green-700" id="long-memory-timer-display">${formatTime(longMemoryTimeRemaining)}</span></div>
-                            <div class="bg-gray-50 p-4 rounded-lg shadow-inner font-mono text-lg space-y-2 overflow-y-auto max-h-[60vh]">
-                                ${longMemoryData.map((line, index) => `
-                                    <div class="flex items-center mb-1">
-                                        <span class="font-sans font-bold text-gray-500 w-10 text-left">${index + 1}.</span>
-                                        <div class="flex flex-wrap flex-grow border border-gray-200 rounded-md p-1">
-                                            ${line.split('').map(char => `<span class="number-box w-6 h-6 text-sm sm:w-8 sm:h-8 sm:text-base md:w-10 md:h-10 md:text-xl">${char}</span>`).join('')}
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            <div class="flex justify-center mt-6">
-                                <button id="skip-memorize-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg">Kết Thúc Ghi Nhớ</button>
-                            </div>`;
-                        break;
-                    case 'longMemoryAnswering':
-                        exerciseUI = `
-                            <h2 class="text-4xl font-extrabold text-blue-700 mb-4 text-center">Long Memory</h2>
-                            <p class="text-lg text-gray-600 mb-4 text-center">Nhập lại các dòng dữ liệu bạn đã nhớ.</p>
-                            <div class="text-center mb-4"><span class="text-4xl font-bold text-red-600" id="answer-timer-display">${formatTime(answerTimeRemaining)}</span></div>
-                            <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-                                ${longMemoryData.map((line, lineIndex) => `
-                                    <div class="flex items-start">
-                                        <label class="font-sans font-bold text-gray-500 w-10 mt-1 text-left">${lineIndex + 1}.</label>
-                                        <div class="flex flex-wrap flex-grow border border-gray-300 rounded-md p-1">
-                                            ${Array(40).fill().map((_, charIndex) => `
-                                                <input type="text"
-                                                    data-line-index="${lineIndex}"
-                                                    data-char-index="${charIndex}"
-                                                    maxlength="1"
-                                                    value="${longMemoryUserInput[lineIndex][charIndex]}"
-                                                    class="number-box w-6 h-6 text-sm sm:w-8 sm:h-8 sm:text-base md:w-10 md:h-10 md:text-xl
-                                                           text-center font-mono
-                                                           border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none
-                                                           border-input-default">
-                                            `).join('')}
-                                        </div>
-                                    </div>`).join('')}
-                            </div>
-                            <div class="flex justify-center mt-6">
-                                <button id="score-long-memory-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg">Hoàn Thành & Chấm Điểm</button>
-                                <!-- Removed help button from here -->
-                            </div>`;
-                        break;
-                    case 'longMemoryScored':
-                        let comparisonHTML = longMemoryData.map((correctLine, index) => {
-                            // Reconstruct userLine from the 2D array for comparison
-                            const userLine = longMemoryUserInput[index].join('');
-                            let resultLine = '';
-                            // Compare character by character
-                            for (let i = 0; i < correctLine.length; i++) {
-                                if (i < userLine.length) {
-                                    resultLine += `<span class="${userLine[i] === correctLine[i] ? 'char-correct' : 'char-incorrect'}">${correctLine[i]}</span>`;
-                                } else {
-                                    // If user input is shorter than correct line, mark remaining as missing
-                                    resultLine += `<span class="char-missing">${correctLine[i]}</span>`;
-                                }
-                            }
-                            // If user input is longer, just display the extra characters without comparison
-                            if (userLine.length > correctLine.length) {
-                                resultLine += `<span class="char-incorrect">${userLine.substring(correctLine.length)}</span>`;
-                            }
-
-
-                            return `
-                                <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-                                    <p class="font-bold">Dòng ${index + 1}:</p>
-                                    <p class="font-mono text-sm break-all">Đáp án:   ${correctLine}</p>
-                                    <p class="font-mono text-sm break-all">Của bạn: ${userLine}</p>
-                                    <p class="font-mono text-lg break-all">Kết quả:  ${resultLine}</p>
-                                </div>`;
-                        }).join('');
-
-                        exerciseUI = `
-                            <h2 class="text-4xl font-extrabold text-blue-700 mb-4 text-center">Kết Quả Bài Tập</h2>
-                            <div class="text-center bg-purple-100 p-4 rounded-lg shadow-md mb-6">
-                                <p class="text-2xl font-bold text-purple-800">Điểm của bạn: ${longMemoryScore.correct} / ${longMemoryScore.total}</p>
-                                <p class="text-lg text-purple-700">Tỷ lệ chính xác: ${longMemoryScore.total > 0 ? ((longMemoryScore.correct / longMemoryScore.total) * 100).toFixed(2) : 0}%</p>
-                            </div>
-                            <div class="max-h-[50vh] overflow-y-auto p-2 border rounded-lg">${comparisonHTML}</div>
-                            <div class="flex justify-center mt-6">
-                                <button id="end-exercise-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg">Về Menu Bài Tập</button>
-                            </div>`;
-                        break;
-                }
-                 mainContent = `<div class="bg-white p-8 rounded-xl shadow-xl">${exerciseUI}</div>`;
-            }
-
-            // Removed history section entirely
-            return mainContent;
-        };
-
-        // --- Game Logic Functions ---
-
-        // START: Long Memory Logic
-        /**
-         * Initiates the configuration phase for the Long Memory exercise.
-         */
-        function startLongMemoryConfig() {
-            isExerciseActive = true;
-            activeExerciseType = 'longMemoryConfig';
-            renderPage();
-        }
-
-        /**
-         * Starts the Long Memory game based on configured settings.
-         * Generates data lines and begins the memorization countdown.
-         */
-        function startLongMemoryGame() {
-            longMemoryConfig.memorizeTime = parseInt(document.getElementById('memorize-time').value, 10) || 5;
-            longMemoryConfig.answerTime = parseInt(document.getElementById('answer-time').value, 10) || 3;
-            longMemoryConfig.numLines = parseInt(document.getElementById('num-lines').value, 10) || 10;
-
-            // Ensure values are within reasonable bounds (e.g., at least 1)
-            longMemoryConfig.memorizeTime = Math.max(1, longMemoryConfig.memorizeTime);
-            longMemoryConfig.answerTime = Math.max(1, longMemoryConfig.answerTime);
-            longMemoryConfig.numLines = Math.max(1, longMemoryConfig.numLines);
-
-            longMemoryData = Array.from({ length: longMemoryConfig.numLines }, () => generateLine(40));
-            // Initialize user input array with arrays of 40 empty strings
-            longMemoryUserInput = Array.from({ length: longMemoryConfig.numLines }, () => Array(40).fill(''));
-            activeExerciseType = 'longMemoryPlaying';
-            longMemoryTimeRemaining = longMemoryConfig.memorizeTime * 60; // Convert minutes to seconds
-            renderPage();
-            startLongMemoryCountdown();
-        }
-
-        /**
-         * Starts the countdown timer for the memorization phase of the Long Memory exercise.
-         * Transitions to the answering phase when time runs out.
-         */
-        function startLongMemoryCountdown() {
-            if (currentLongMemoryTimerIntervalId) clearInterval(currentLongMemoryTimerIntervalId); // Clear any existing timer
-            currentLongMemoryTimerIntervalId = setInterval(() => {
-                longMemoryTimeRemaining--;
-                const timerDisplay = document.getElementById('long-memory-timer-display');
-                if (timerDisplay) timerDisplay.textContent = formatTime(longMemoryTimeRemaining);
-                if (longMemoryTimeRemaining <= 0) {
-                    transitionToAnswering();
-                }
-            }, 1000);
-        }
-
-        /**
-         * New function to skip the memorization phase and immediately transition to answering.
-         */
-        function skipMemorizePhase() {
-            transitionToAnswering();
-        }
-
-        /**
-         * Transitions the Long Memory exercise from the memorization phase to the answering phase.
-         */
-        function transitionToAnswering() {
-            if (currentLongMemoryTimerIntervalId) clearInterval(currentLongMemoryTimerIntervalId);
-            activeExerciseType = 'longMemoryAnswering';
-            answerTimeRemaining = longMemoryConfig.answerTime * 60; // Convert minutes to seconds
-            renderPage();
-            startAnswerCountdown();
-        }
-
-        /**
-         * Starts the countdown timer for the answering phase of the Long Memory exercise.
-         * Scores the exercise when time runs out.
-         */
-        function startAnswerCountdown() {
-            if (currentAnswerTimerIntervalId) clearInterval(currentAnswerTimerIntervalId); // Clear any existing timer
-            currentAnswerTimerIntervalId = setInterval(() => {
-                answerTimeRemaining--;
-                const timerDisplay = document.getElementById('answer-timer-display');
-                if (timerDisplay) timerDisplay.textContent = formatTime(answerTimeRemaining);
-                if (answerTimeRemaining <= 0) {
-                    scoreLongMemoryExercise();
-                }
-            }, 1000);
-        }
-
-        /**
-         * Handles individual character input for the Long Memory answering phase.
-         * Updates the internal user input state and manages focus movement.
-         * @param {HTMLElement} inputElement - The input element that received the event.
-         * @param {number} lineIndex - The index of the line being edited.
-         * @param {number} charIndex - The index of the character in the line.
-         */
-        function handleLongMemoryCharInput(inputElement, lineIndex, charIndex) {
-            // Update the character at the specific index in the 2D array
-            longMemoryUserInput[lineIndex][charIndex] = inputElement.value;
-
-            // Removed direct visual feedback (green/red borders)
-            inputElement.classList.remove('border-input-correct', 'bg-green-50', 'border-input-incorrect', 'bg-red-50');
-            inputElement.classList.add('border-input-default');
-
-
-            // If a character was entered and it's not the last box, move focus to the next box
-            if (inputElement.value !== '' && charIndex < 39) {
-                const nextInput = document.querySelector(
-                    `input[data-line-index="${lineIndex}"][data-char-index="${charIndex + 1}"]`
-                );
-                if (nextInput) {
-                    nextInput.focus();
-                }
-            }
-        }
-
-        /**
-         * Handles keydown events for individual character input boxes in Long Memory answering phase.
-         * Specifically for Backspace, ArrowLeft, ArrowRight navigation, and Enter to submit.
-         * @param {Event} event - The keyboard event.
-         */
-        function handleLongMemoryCharBoxKeydown(event) {
-            if (event.target.matches('input[data-line-index][data-char-index]')) {
-                const inputElement = event.target;
-                const lineIndex = parseInt(inputElement.dataset.lineIndex, 10);
-                const charIndex = parseInt(inputElement.dataset.charIndex, 10);
-
-                if (event.key === 'Enter') {
-                    event.preventDefault(); // Prevent default form submission
-                    scoreLongMemoryExercise(); // Submit the answer
-                } else if (event.key === 'Backspace') {
-                    event.preventDefault(); // Prevent default browser back navigation
-
-                    if (inputElement.value === '' && charIndex > 0) {
-                        // If current box is empty, move to previous and clear it
-                        const prevInput = document.querySelector(
-                            `input[data-line-index="${lineIndex}"][data-char-index="${charIndex - 1}"]`
-                        );
-                        if (prevInput) {
-                            prevInput.focus();
-                            prevInput.value = ''; // Clear its visual content
-                            // Update model: set to empty string
-                            longMemoryUserInput[lineIndex][charIndex - 1] = '';
-                            // Ensure default styling
-                            prevInput.classList.remove('border-input-correct', 'bg-green-50', 'border-input-incorrect', 'bg-red-50');
-                            prevInput.classList.add('border-input-default');
-                        }
-                    } else if (inputElement.value !== '') {
-                        // If current box has content, just clear it
-                        inputElement.value = '';
-                        // Update model: set to empty string
-                        longMemoryUserInput[lineIndex][charIndex] = '';
-                        // Ensure default styling
-                        inputElement.classList.remove('border-input-correct', 'bg-green-50', 'border-input-incorrect', 'bg-red-50');
-                        inputElement.classList.add('border-input-default');
-                    }
-                } else if (event.key === 'ArrowRight') {
-                    event.preventDefault();
-                    if (charIndex < 39) {
-                        const nextInput = document.querySelector(`input[data-line-index="${lineIndex}"][data-char-index="${charIndex + 1}"]`);
-                        if (nextInput) nextInput.focus();
-                    } else if (lineIndex < longMemoryConfig.numLines - 1) {
-                         // Move to start of next line
-                        const nextLineFirstInput = document.querySelector(`input[data-line-index="${lineIndex + 1}"][data-char-index="0"]`);
-                        if (nextLineFirstInput) nextLineFirstInput.focus();
-                    }
-                } else if (event.key === 'ArrowLeft') {
-                    event.preventDefault();
-                    if (charIndex > 0) {
-                        const prevInput = document.querySelector(`input[data-line-index="${lineIndex}"][data-char-index="${charIndex - 1}"]`);
-                        if (prevInput) prevInput.focus();
-                    } else if (lineIndex > 0) {
-                        // Move to end of previous line
-                        const prevLineLastInput = document.querySelector(`input[data-line-index="${lineIndex - 1}"][data-char-index="39"]`);
-                        if (prevLineLastInput) prevLineLastInput.focus();
-                    }
-                }
-            }
-        }
-
-
-        /**
-         * Calculates and displays the score for the Long Memory exercise based on specific rules.
-         * Compares user input with the correct data line by character and applies points accordingly.
-         */
-        function scoreLongMemoryExercise() {
-            if (currentAnswerTimerIntervalId) clearInterval(currentAnswerTimerIntervalId);
-            let totalEarnedScore = 0; // This will now represent accumulated points based on rules
-            // Total possible score is numLines * 40 points per line
-            let totalPossibleScore = longMemoryConfig.numLines * 40; 
-
-            longMemoryData.forEach((correctLine, index) => {
-                // Reconstruct userLine from the 2D array for comparison
-                const userLine = longMemoryUserInput[index].join('');
-                let currentLineScore = 0;
-
-                if (index < longMemoryData.length - 1) {
-                    // Scoring for non-last lines (rules 1, 2, 3 from the image)
-                    let differences = 0;
-                    // Count mismatches up to the shorter length
-                    const minLength = Math.min(correctLine.length, userLine.length);
-                    for (let i = 0; i < minLength; i++) {
-                        if (userLine[i] !== correctLine[i]) {
-                            differences++;
-                        }
-                    }
-                    // Add differences due to length disparity (missing or extra characters)
-                    differences += Math.abs(correctLine.length - userLine.length);
-
-                    if (differences === 0) {
-                        currentLineScore = 40; // Rule 1: Perfect match
-                    } else if (differences === 1) {
-                        currentLineScore = 20; // Rule 2: Exactly one error
-                    } else {
-                        currentLineScore = 0; // Rule 3: Two or more errors
-                    }
                 } else {
-                    // Scoring for the last line (rules 5, 6, 7 from the image)
-                    let charDifferencesInWritten = 0;
-                    // Count mismatches only for characters the user typed, against the correct line's corresponding part
-                    const userTypedLength = userLine.trimEnd().length; // Consider only actual typed characters, trim trailing spaces
-                    const comparableLength = Math.min(userTypedLength, correctLine.length);
+                    const inputs = Array(shortData.digit).fill('').map((_, i) => `
+                        <input data-i="${i}" value="${shortData.input[i]||''}" type="text" inputmode="numeric" maxlength="1"
+                        class="number-box w-14 h-20 text-4xl text-center font-bold rounded-xl border-2 border-white bg-white/50 shadow-sm text-slate-700 placeholder-slate-300 focus:ring-4 focus:ring-blue-100 focus:border-blue-500" 
+                        ${shortFeedback?'disabled':''}>
+                    `).join('');
+                    
+                    let msg = '';
+                    if(shortFeedback === 'correct') msg = `<div class="mt-8 p-4 bg-green-100 text-green-700 rounded-2xl font-bold inline-flex items-center gap-2 animate-bounce"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Tuyệt vời! Chuẩn bị tiếp theo...</div>`;
+                    else if(shortFeedback) msg = `
+                        <div class="mt-8 p-6 bg-white rounded-2xl shadow-lg border border-red-100 animate-shake text-center">
+                            <div class="text-red-500 font-bold text-xl mb-1">Sai rồi!</div>
+                            <div class="text-slate-400 text-sm mb-3">Đáp án đúng là</div>
+                            <div class="font-digit text-3xl font-bold text-slate-800 tracking-widest">${shortFeedback.split(':')[1]}</div>
+                            <button onclick="startShort()" class="mt-4 px-6 py-2 bg-slate-800 text-white rounded-lg font-bold hover:bg-slate-900 transition-colors">Thử lại</button>
+                        </div>`;
 
-                    for (let i = 0; i < comparableLength; i++) {
-                        if (userLine[i] !== correctLine[i]) {
-                            charDifferencesInWritten++;
-                        }
-                    }
-                    // Rule 5: Perfect match for the typed portion of the last line
-                    if (charDifferencesInWritten === 0 && userTypedLength > 0) {
-                        currentLineScore = userTypedLength;
-                    } else if (charDifferencesInWritten === 1 && userTypedLength > 0) {
-                        // Rule 6: One error in the typed portion of the last line
-                        currentLineScore = Math.ceil(userTypedLength / 2);
-                    } else {
-                        // Rule 7: Two or more errors, or empty line for the last line
-                        currentLineScore = 0;
-                    }
-                }
-                totalEarnedScore += currentLineScore; // Accumulate points for this line
-            });
-
-            longMemoryScore = { correct: totalEarnedScore, total: totalPossibleScore };
-            activeExerciseType = 'longMemoryScored';
-            renderPage();
-        }
-        // END: Long Memory Logic
-
-
-        // START: Short Memory Logic
-        /**
-         * Initializes and starts the Short Memory number memorization exercise.
-         */
-        function startShortMemoryExercise() {
-            isExerciseActive = true;
-            activeExerciseType = 'shortMemory';
-            digitCount = 1; // Start with 1 digit
-            currentStreakLength = 0; // Reset streak
-            loadHighestStreakLengthEver(); // Load highest streak from storage
-            generateAndShowNumbers(digitCount);
-        }
-        
-        /**
-         * Generates a new set of random numbers and displays them, then hides them.
-         * @param {number} count - The number of digits to generate.
-         */
-        function generateAndShowNumbers(count) {
-            if (currentTimeoutId) clearTimeout(currentTimeoutId); // Clear any previous timeout
-            feedback = ''; // Clear previous feedback
-            shortMemoryUserInput = Array(count).fill(''); // Initialize shortMemoryUserInput based on digitCount
-            numbers = Array.from({ length: count }, () => Math.floor(Math.random() * 10)); // Generate new numbers
-            showNumbers = true; // Set flag to show numbers
-            renderPage(); // Update UI to show numbers
-
-            const numbersDisplay = document.getElementById('numbers-display');
-            if (numbersDisplay) {
-                // Apply dynamic styles for showing numbers
-                numbersDisplay.textContent = numbers.join('');
-                numbersDisplay.classList.remove('text-gray-400', 'bg-gray-50', 'text-4xl');
-                numbersDisplay.classList.add('text-blue-600', 'bg-blue-50', 'animate-pulse', 'text-6xl');
-
-                currentTimeoutId = setTimeout(() => {
-                    showNumbers = false; // Set flag to hide numbers
-                    renderPage(); // Re-render to update input state and numbers display
-
-                    // After rendering, set focus to the first short memory input box
-                    const firstInput = document.querySelector('input[data-short-memory-char-index="0"]');
-                    if (firstInput) {
-                        firstInput.focus();
-                    }
-                }, 3000); // Numbers shown for 3 seconds
-            }
-        }
-
-        /**
-         * Handles individual character input for the Short Memory answering phase.
-         * Updates the internal user input state and manages focus movement.
-         * @param {HTMLElement} inputElement - The input element that received the event.
-         * @param {number} charIndex - The index of the character in the line.
-         */
-        function handleShortMemoryCharInput(inputElement, charIndex) {
-            // Update the character at the specific index in the array
-            shortMemoryUserInput[charIndex] = inputElement.value;
-
-            // Removed direct visual feedback (green/red borders)
-            inputElement.classList.remove('border-input-correct', 'bg-green-50', 'border-input-incorrect', 'bg-red-50');
-            inputElement.classList.add('border-input-default');
-
-            // If a character was entered and it's not the last box, move focus to the next box
-            if (inputElement.value !== '' && charIndex < digitCount - 1) {
-                const nextInput = document.querySelector(
-                    `input[data-short-memory-char-index="${charIndex + 1}"]`
-                );
-                if (nextInput) {
-                    nextInput.focus();
+                    html = `
+                    <div class="max-w-4xl mx-auto text-center">
+                        <button onclick="stop()" class="mb-6 text-slate-400 hover:text-slate-600 font-bold flex items-center gap-2 mx-auto transition-colors">← Quay lại Dashboard</button>
+                        <div class="glass-panel rounded-3xl p-10 min-h-[50vh] flex flex-col items-center justify-center">
+                            <div class="text-slate-400 font-bold mb-8 uppercase tracking-widest text-xs">Nhập lại dãy số bạn vừa thấy</div>
+                            <div class="flex flex-wrap justify-center gap-3">${inputs}</div>
+                            ${msg}
+                        </div>
+                    </div>`;
                 }
             }
+
+            // 3. CONFIG LONG
+            else if(activeType === 'longCfg') {
+                html = `
+                <div class="max-w-md mx-auto mt-10">
+                    <div class="glass-panel rounded-3xl p-8 shadow-xl relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-500 to-accent-500"></div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-6">Cấu hình bài tập</h2>
+                        <div class="space-y-5">
+                            <div><label class="text-sm font-bold text-slate-500 ml-1 mb-1 block">Thời gian nhớ (phút)</label><input id="i-mem" type="number" value="5" class="w-full p-3 rounded-xl bg-white/50 border border-white shadow-sm focus:ring-2 focus:ring-brand-500 outline-none font-bold text-slate-700"></div>
+                            <div><label class="text-sm font-bold text-slate-500 ml-1 mb-1 block">Thời gian trả lời (phút)</label><input id="i-ans" type="number" value="5" class="w-full p-3 rounded-xl bg-white/50 border border-white shadow-sm focus:ring-2 focus:ring-brand-500 outline-none font-bold text-slate-700"></div>
+                            <div><label class="text-sm font-bold text-slate-500 ml-1 mb-1 block">Số dòng (40 số/dòng)</label><input id="i-cnt" type="number" value="2" class="w-full p-3 rounded-xl bg-white/50 border border-white shadow-sm focus:ring-2 focus:ring-brand-500 outline-none font-bold text-slate-700"></div>
+                        </div>
+                        <div class="flex gap-3 mt-8">
+                            <button onclick="stop()" class="flex-1 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors">Hủy</button>
+                            <button onclick="startLong()" class="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-brand-600 to-brand-500 shadow-lg shadow-brand-500/30 hover:shadow-brand-500/50 hover:scale-[1.02] transition-all">Bắt đầu</button>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            // 4. MEMORY PHASE
+            else if(activeType === 'longMem') {
+                const grid = longData.lines.map((l, i) => `
+                    <div class="group relative bg-white/40 hover:bg-white/80 border border-white/60 rounded-2xl p-5 mb-3 transition-all duration-200 cursor-pointer hover:shadow-md flex items-start" onclick="toggleMask(${i})">
+                        <div class="w-8 h-8 rounded-full bg-white text-brand-600 flex items-center justify-center font-bold text-sm shadow-sm mr-4 shrink-0">${i+1}</div>
+                        <div id="r-${i}" class="font-digit text-xl md:text-2xl text-slate-700 break-all leading-relaxed tracking-wide transition-all duration-300">${grp2(l)}</div>
+                        <div class="absolute top-3 right-3 text-slate-300 group-hover:text-brand-400 transition-colors">
+                            <svg id="icon-${i}" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        </div>
+                    </div>
+                `).join('');
+                
+                html = `
+                <div class="glass-panel rounded-3xl h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+                    <div class="p-4 border-b border-white/50 bg-white/30 flex justify-between items-center backdrop-blur-md z-10">
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1 rounded-full bg-brand-100 text-brand-700 text-xs font-black uppercase tracking-wider">GHI NHỚ</span>
+                            <span class="text-xs font-bold text-slate-400 hidden sm:block">TIP: Click vào dòng để che</span>
+                        </div>
+                        <div id="timer-txt" class="font-digit text-2xl font-bold text-slate-700">${fmtTime(timer.val)}</div>
+                        <button onclick="activeType='longAns'; prepAns();" class="px-5 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 shadow-sm transition-all">Trả lời ngay ➜</button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-2 custom-scrollbar">${grid}</div>
+                </div>`;
+            }
+
+            // 5. ANSWER PHASE
+            else if(activeType === 'longAns') {
+                const grid = longData.input.map((_, r) => `
+                    <div class="bg-white/60 border border-white rounded-2xl p-4 mb-4 shadow-sm">
+                        <div class="flex justify-between mb-2 px-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dòng ${r+1}</span>
+                            <span id="p-${r}" class="text-[10px] font-bold text-slate-300">0/40</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            ${Array(40).fill('').map((_, c) => `
+                                <input data-r="${r}" data-c="${c}" value="${longData.input[r][c]}" type="text" inputmode="numeric" maxlength="1"
+                                class="number-box w-8 h-10 sm:w-9 sm:h-11 text-center font-digit text-lg border border-transparent rounded-lg bg-white shadow-sm text-slate-700 focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+
+                html = `
+                <div class="glass-panel rounded-3xl h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+                    <div class="p-4 border-b border-white/50 bg-white/30 flex justify-between items-center backdrop-blur-md z-10">
+                         <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-black uppercase tracking-wider">TRẢ LỜI</span>
+                        <div id="timer-txt" class="font-digit text-2xl font-bold text-slate-700">${fmtTime(timer.val)}</div>
+                        <button onclick="scoreLong()" class="px-6 py-2 bg-brand-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-brand-500/30 hover:bg-brand-700 transition-all">Nộp bài ✓</button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-slate-50/30">${grid}</div>
+                </div>`;
+            }
+
+            // 6. RESULT PHASE
+            else if(activeType === 'longRes') {
+                const pct = longData.score.t ? Math.round((longData.score.c/longData.score.t)*100) : 0;
+                const color = pct>=80 ? 'text-green-500' : (pct>=50 ? 'text-amber-500' : 'text-red-500');
+                
+                const details = longData.lines.map((l, i) => {
+                    const u = longData.input[i].join('');
+                    let res = '';
+                    for(let k=0; k<l.length; k++) {
+                        if(k<u.length) res += `<span class="${u[k]===l[k]?'char-correct':'char-incorrect'}">${l[k]}</span>`;
+                        else res += `<span class="char-missing">${l[k]}</span>`;
+                        if((k+1)%2===0) res+=' ';
+                    }
+                    if(u.length > l.length) res += `<span class="char-incorrect">${u.substring(l.length)}</span>`;
+
+                    return `
+                    <div class="bg-white/50 border border-white rounded-2xl p-5 mb-4 shadow-sm">
+                        <div class="font-bold text-slate-700 mb-3 text-sm border-b border-slate-100 pb-2">Dòng ${i+1}</div>
+                        <div class="grid grid-cols-[60px_1fr] gap-y-2 font-digit text-sm">
+                            <div class="text-slate-400 text-[10px] uppercase pt-1 font-bold">Gốc</div>
+                            <div class="text-slate-500 break-all">${grp2(l)}</div>
+                            <div class="text-slate-400 text-[10px] uppercase pt-1 font-bold">Bạn</div>
+                            <div class="text-slate-800 break-all font-bold">${grp2(u)||'-'}</div>
+                            <div class="text-slate-400 text-[10px] uppercase pt-1 font-bold">Sai/Đúng</div>
+                            <div class="bg-white p-2 rounded-lg border border-slate-100 shadow-inner break-all leading-relaxed">${res}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                html = `
+                <div class="max-w-4xl mx-auto pb-12">
+                    <div class="glass-panel rounded-3xl p-8 text-center mb-8 shadow-lg relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-${pct>=50?'green':'red'}-400 to-${pct>=50?'green':'red'}-600"></div>
+                        <h2 class="text-xl font-bold text-slate-800 mb-6 uppercase tracking-widest">Kết Quả Tổng Hợp</h2>
+                        <div class="flex justify-center items-end gap-2 mb-2">
+                            <span class="text-6xl font-black ${color} drop-shadow-sm">${pct}%</span>
+                            <span class="text-xl font-bold text-slate-400 mb-2">chính xác</span>
+                        </div>
+                        <div class="text-slate-500 font-medium mb-8">Đạt <strong class="text-slate-800">${longData.score.c}</strong> trên tổng số ${longData.score.t} điểm</div>
+                        <div class="flex justify-center gap-4">
+                            <button onclick="stop()" class="px-6 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition-all">Về Menu</button>
+                            <button onclick="startLong()" class="px-6 py-2.5 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-500/30 transition-all">Làm lại bài tập</button>
+                        </div>
+                    </div>
+                    <div class="space-y-4">${details}</div>
+                </div>`;
+            }
+
+            app.innerHTML = html;
         }
 
-        /**
-         * Handles keydown events for individual character input boxes in Short Memory answering phase.
-         * Specifically for Backspace, ArrowLeft, ArrowRight navigation, and Enter to submit.
-         * @param {Event} event - The keyboard event.
-         */
-        function handleShortMemoryCharBoxKeydown(event) {
-            if (event.target.matches('input[data-short-memory-char-index]')) {
-                const inputElement = event.target;
-                const charIndex = parseInt(inputElement.dataset.shortMemoryCharIndex, 10);
+        // --- EVENTS ---
+        document.addEventListener('input', e => {
+            // Short
+            if(e.target.matches('input[data-i]')) {
+                const i = parseInt(e.target.dataset.i);
+                shortData.input[i] = e.target.value;
+                if(e.target.value && i < shortData.digit-1) document.querySelector(`input[data-i="${i+1}"]`).focus();
+                if(shortData.input.join('').length === shortData.digit) checkShort();
+            }
+            // Long
+            if(e.target.matches('input[data-r]')) {
+                const r = parseInt(e.target.dataset.r);
+                const c = parseInt(e.target.dataset.c);
+                longData.input[r][c] = e.target.value;
+                
+                // Update Progress
+                const f = longData.input[r].filter(x=>x).length;
+                const p = document.getElementById(`p-${r}`);
+                if(p) { p.innerText = `${f}/40`; p.className = f===40 ? 'text-[10px] font-bold text-green-500' : 'text-[10px] font-bold text-slate-300'; }
 
-                if (event.key === 'Enter') {
-                    event.preventDefault(); // Prevent default form submission
-                    checkAnswer(); // Submit the answer
-                } else if (event.key === 'Backspace') {
-                    event.preventDefault(); // Prevent default browser back navigation
-
-                    if (inputElement.value === '' && charIndex > 0) {
-                        // If current box is empty, move to previous and clear it
-                        const prevInput = document.querySelector(
-                            `input[data-short-memory-char-index="${charIndex - 1}"]`
-                        );
-                        if (prevInput) {
-                            prevInput.focus();
-                            prevInput.value = ''; // Clear its visual content
-                            // Update model: set to empty string
-                            shortMemoryUserInput[charIndex - 1] = '';
-                            // Ensure default styling
-                            prevInput.classList.remove('border-input-correct', 'bg-green-50', 'border-input-incorrect', 'bg-red-50');
-                            prevInput.classList.add('border-input-default');
-                        }
-                    } else if (inputElement.value !== '') {
-                        // If current box has content, just clear it
-                        inputElement.value = '';
-                        // Update model: set to empty string
-                        shortMemoryUserInput[charIndex] = '';
-                        // Ensure default styling
-                        inputElement.classList.remove('border-input-correct', 'bg-green-50', 'border-input-incorrect', 'bg-red-50');
-                        inputElement.classList.add('border-input-default');
-                    }
-                } else if (event.key === 'ArrowRight') {
-                    event.preventDefault();
-                    if (charIndex < digitCount - 1) {
-                        const nextInput = document.querySelector(`input[data-short-memory-char-index="${charIndex + 1}"]`);
-                        if (nextInput) nextInput.focus();
-                    }
-                } else if (event.key === 'ArrowLeft') {
-                    event.preventDefault();
-                    if (charIndex > 0) {
-                        const prevInput = document.querySelector(`input[data-short-memory-char-index="${charIndex - 1}"]`);
-                        if (prevInput) prevInput.focus();
-                    }
+                // Auto Jump
+                if(e.target.value) {
+                    if(c < 39) document.querySelector(`input[data-r="${r}"][data-c="${c+1}"]`)?.focus();
+                    else document.querySelector(`input[data-r="${r+1}"][data-c="0"]`)?.focus();
                 }
             }
-        }
-
-        /**
-         * Checks the user's input against the generated numbers for the Short Memory exercise.
-         * Updates streak, feedback, and prepares for the next round or resets the game.
-         */
-        function checkAnswer() {
-            const userEnteredNumber = shortMemoryUserInput.join(''); // Join array to form the full number
-            const correctNumber = numbers.join(''); // Correct number from generated sequence
-
-            if (userEnteredNumber === correctNumber) {
-                feedback = 'Chính xác! Chuỗi ghi nhớ tăng lên.';
-                currentStreakLength++; // Increment streak
-                if (currentStreakLength > highestStreakLengthEver) {
-                    highestStreakLengthEver = currentStreakLength;
-                    saveHighestStreakLengthEver(); // Save new highest streak
-                }
-                digitCount++; // Increase number of digits for next round
-                setTimeout(() => generateAndShowNumbers(digitCount), 1500); // Wait a bit then show next round
-            } else {
-                feedback = `Sai rồi! Đáp án đúng là: ${correctNumber}. Bạn đã nhớ được ${currentStreakLength} số.`;
-                // Add current performance to history
-                exerciseHistory.push({
-                    score: currentStreakLength,
-                    date: new Date().toLocaleString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-                });
-                saveExerciseHistory(); // Save updated history
-                currentStreakLength = 0; // Reset streak
-                digitCount = 1; // Reset digit count
-                setTimeout(() => {
-                    feedback = ''; // Clear feedback after a delay
-                    generateAndShowNumbers(digitCount); // Start a new game
-                }, 3000); // Show feedback for 3 seconds then reset
-            }
-            renderPage(); // Update UI with feedback
-        }
-        // END: Short Memory Logic
-
-        /**
-         * Ends the current exercise and resets the state to the exercise selection menu.
-         * Clears all active timers and game states.
-         */
-        function endExercise() {
-            // Clear all possible active timeouts/intervals
-            if (currentTimeoutId) clearTimeout(currentTimeoutId);
-            if (currentLongMemoryTimerIntervalId) clearInterval(currentLongMemoryTimerIntervalId);
-            if (currentAnswerTimerIntervalId) clearInterval(currentAnswerTimerIntervalId);
-
-            // Reset all state variables for both exercises
-            isExerciseActive = false;
-            activeExerciseType = 'none';
-            numbers = [];
-            shortMemoryUserInput = []; // Reset for short memory
-            feedback = '';
-            showNumbers = false;
-            currentStreakLength = 0;
-            digitCount = 1;
-
-            longMemoryData = [];
-            longMemoryUserInput = [];
-            longMemoryScore = { correct: 0, total: 0 };
-            longMemoryTimeRemaining = 0;
-            answerTimeRemaining = 0;
-            longMemoryConfig = { memorizeTime: 5, answerTime: 3, numLines: 10 }; // Reset config to default
-
-            renderPage(); // Render the exercise selection page
-        }
-
-        /**
-         * Clears the entire exercise history from local storage and the current state.
-         */
-        function clearHistory() {
-            // Functionality removed from UI, but can be reactivated if needed.
-            exerciseHistory = [];
-            saveExerciseHistory(); // Save empty history
-            renderPage(); // Re-render to reflect cleared history
-        }
-
-        // --- Help Modal Functions ---
-        const helpContent = {
-            'shortMemory': {
-                title: 'Hướng Dẫn Bài Tập Ghi Nhớ Số (Trí Nhớ Ngắn Hạn)',
-                body: `
-                    <p class="mb-2">Đây là bài tập giúp bạn rèn luyện khả năng ghi nhớ các dãy số ngắn hạn.</p>
-                    <h4 class="font-semibold text-lg mb-1">Cách chơi:</h4>
-                    <ul class="list-disc list-inside mb-4">
-                        <li>Một dãy số sẽ xuất hiện trên màn hình trong 3 giây.</li>
-                        <li>Sau khi dãy số biến mất, hãy cố gắng nhập lại dãy số đó vào các ô trống.</li>
-                        <li>Bạn có thể sử dụng phím <kbd>Enter</kbd> để kiểm tra đáp án.</li>
-                        <li>Sử dụng phím <kbd>Backspace</kbd> để xóa ký tự và di chuyển con trỏ về ô trước đó.</li>
-                        <li>Sử dụng phím <kbd>Mũi tên trái/phải</kbd> để di chuyển giữa các ô.</li>
-                        <li>Nếu bạn nhập đúng, độ dài dãy số sẽ tăng lên ở lượt chơi tiếp theo.</li>
-                        <li>Nếu bạn nhập sai, lượt chơi sẽ kết thúc và bạn sẽ bắt đầu lại từ độ dài 1 chữ số.</li>
-                        <li>Mục tiêu là đạt được chuỗi ghi nhớ dài nhất có thể!</li>
-                    </ul>
-                `
-            },
-            'longMemory': {
-                title: 'Hướng Dẫn Bài Tập Trí Nhớ Dài Hạn',
-                body: `
-                    <p class="mb-2">Bài tập này thách thức khả năng ghi nhớ thông tin trong thời gian dài hơn với các quy tắc chấm điểm cụ thể.</p>
-                    <h4 class="font-semibold text-lg mb-1">Cấu hình:</h4>
-                    <ul class="list-disc list-inside mb-2">
-                        <li>**Thời gian nhớ:** Thời gian bạn có để ghi nhớ các dòng dữ liệu.</li>
-                        <li>**Thời gian trả lời:** Thời gian bạn có để nhập lại các dòng dữ liệu.</li>
-                        <li>**Số dòng dữ liệu:** Số lượng dòng dữ liệu bạn cần ghi nhớ (mỗi dòng 40 ký tự).</li>
-                    </ul>
-                    <h4 class="font-semibold text-lg mb-1">Cách chơi:</h4>
-                    <ul class="list-disc list-inside mb-4">
-                        <li>**Giai đoạn ghi nhớ:** Các dòng dữ liệu sẽ xuất hiện. Hãy cố gắng ghi nhớ chúng trong thời gian cho phép. Bạn có thể nhấn "Kết Thúc Ghi Nhớ" để chuyển sang giai đoạn trả lời ngay lập tức.</li>
-                        <li>**Giai đoạn trả lời:** Nhập lại các dòng dữ liệu bạn đã nhớ vào các ô trống. Mỗi ô tương ứng với một ký tự.</li>
-                        <li>Bạn có thể sử dụng phím <kbd>Enter</kbd> để hoàn thành và chấm điểm.</li>
-                        <li>Sử dụng phím <kbd>Backspace</kbd> để xóa ký tự và di chuyển con trỏ.</li>
-                        <li>Sử dụng phím <kbd>Mũi tên trái/phải</kbd> để di chuyển giữa các ô.</li>
-                    </ul>
-                    <h4 class="font-semibold text-lg mb-1">Quy tắc chấm điểm:</h4>
-                    <ul class="list-disc list-inside">
-                        <li>**Dòng không phải dòng cuối cùng:**</li>
-                        <ul>
-                            <li>0 lỗi (đúng hoàn toàn về nội dung và độ dài): 40 điểm.</li>
-                            <li>1 lỗi (sai 1 ký tự, hoặc thiếu/thừa 1 ký tự): 20 điểm.</li>
-                            <li>Từ 2 lỗi trở lên: 0 điểm.</li>
-                        </ul>
-                        <li>**Dòng cuối cùng:**</li>
-                        <ul>
-                            <li>Tất cả ký tự đã nhập đều đúng: Số điểm bằng số ký tự đã nhập.</li>
-                            <li>Có đúng 1 lỗi trong các ký tự đã nhập: Làm tròn lên (số ký tự đã nhập / 2) điểm.</li>
-                            <li>Từ 2 lỗi trở lên hoặc không nhập gì: 0 điểm.</li>
-                        </ul>
-                    </ul>
-                `
-            }
-        };
-
-        function showHelpModal(exerciseType) {
-            const content = helpContent[exerciseType];
-            if (content) {
-                helpModalTitle.textContent = content.title;
-                helpModalBody.innerHTML = content.body;
-                helpModalOverlay.classList.remove('hidden');
-            }
-        }
-
-        function hideHelpModal() {
-            helpModalOverlay.classList.add('hidden');
-        }
-
-
-        // --- UI Rendering and Event Listener Management ---
-
-        /**
-         * Attaches or re-attaches event listeners to dynamically rendered elements.
-         * This function needs to be called after `appContent.innerHTML` is updated.
-         */
-        function attachEventListeners() {
-            // Clear existing listeners to prevent duplicates and memory leaks
-            appTitle.onclick = null;
-            // Removed navHome, navTechniques, and navExercise onclick listeners as the buttons are removed
-            
-            // Remove previous event listeners for dynamic inputs and keydowns
-            appContent.removeEventListener('input', handleDynamicInputDelegation);
-            appContent.removeEventListener('keydown', handleDynamicKeydownDelegation);
-            helpModalCloseBtn.onclick = null;
-
-
-            // Add new listeners
-            // Global Navigation
-            // Click on app title will now reset the exercise and show exercise selection
-            appTitle.onclick = () => { endExercise(); }; 
-
-            // Help modal close button
-            helpModalCloseBtn.onclick = hideHelpModal;
-
-
-            // Page-specific listeners (only exercise page logic remains relevant here)
-            // No longer need to check currentPage for home/techniques
-            if (!isExerciseActive) {
-                // Exercise selection screen
-                const startShortMemoryBtn = document.getElementById('start-short-memory-exercise');
-                if (startShortMemoryBtn) startShortMemoryBtn.addEventListener('click', startShortMemoryExercise);
-
-                const startLongMemoryBtn = document.getElementById('start-long-memory-exercise');
-                if (startLongMemoryBtn) startLongMemoryBtn.addEventListener('click', startLongMemoryConfig);
-
-            } else if (activeExerciseType === 'shortMemory') {
-                // Short Memory game screen
-                appContent.addEventListener('input', handleDynamicInputDelegation); // Add input listener for short memory boxes
-                appContent.addEventListener('keydown', handleDynamicKeydownDelegation); // Add keydown listener for short memory boxes
-
-                const checkAnswerBtn = document.getElementById('check-answer-btn');
-                if (checkAnswerBtn) {
-                    checkAnswerBtn.addEventListener('click', checkAnswer);
-                }
-
-                const endExerciseBtn = document.getElementById('end-exercise-btn');
-                if (endExerciseBtn) endExerciseBtn.addEventListener('click', endExercise);
-
-                const helpShortMemoryBtn = document.getElementById('help-short-memory-btn');
-                if (helpShortMemoryBtn) helpShortMemoryBtn.addEventListener('click', () => showHelpModal('shortMemory'));
-
-
-            } else if (activeExerciseType === 'longMemoryConfig') {
-                // Long Memory configuration screen
-                const startLongMemoryGameBtn = document.getElementById('start-long-memory-game-btn');
-                if (startLongMemoryGameBtn) startLongMemoryGameBtn.addEventListener('click', startLongMemoryGame);
-                const cancelLongMemoryConfigBtn = document.getElementById('cancel-long-memory-config-btn');
-                if (cancelLongMemoryConfigBtn) cancelLongMemoryConfigBtn.addEventListener('click', endExercise);
-                const helpLongMemoryConfigBtn = document.getElementById('help-long-memory-config-btn');
-                if (helpLongMemoryConfigBtn) helpLongMemoryConfigBtn.addEventListener('click', () => showHelpModal('longMemory'));
-
-
-            } else if (activeExerciseType === 'longMemoryPlaying') {
-                // Long Memory playing screen
-                const skipMemorizeBtn = document.getElementById('skip-memorize-btn');
-                if (skipMemorizeBtn) skipMemorizeBtn.addEventListener('click', skipMemorizePhase);
-
-            } else if (activeExerciseType === 'longMemoryAnswering') {
-                // Long Memory answering screen - use event delegation for inputs and keydowns
-                appContent.addEventListener('input', handleDynamicInputDelegation);
-                appContent.addEventListener('keydown', handleDynamicKeydownDelegation); // Add keydown listener
-                const scoreLongMemoryBtn = document.getElementById('score-long-memory-btn');
-                if (scoreLongMemoryBtn) scoreLongMemoryBtn.addEventListener('click', scoreLongMemoryExercise);
-                // helpLongMemoryBtn removed from here
-
-            } else if (activeExerciseType === 'longMemoryScored') {
-                // Long Memory scored results screen
-                const endExerciseBtn = document.getElementById('end-exercise-btn');
-                if (endExerciseBtn) endExerciseBtn.addEventListener('click', endExercise);
-            }
-
-            // Removed clear history button
-        }
-
-        /**
-         * Delegated event handler for input changes within the appContent.
-         * Directs the event to the appropriate handler based on the input's data attributes.
-         * @param {Event} event - The input event.
-         */
-        function handleDynamicInputDelegation(event) {
-            if (event.target.matches('input[data-line-index][data-char-index]')) {
-                // Long Memory Answering Input
-                const lineIndex = parseInt(event.target.dataset.lineIndex, 10);
-                const charIndex = parseInt(event.target.dataset.charIndex, 10);
-                handleLongMemoryCharInput(event.target, lineIndex, charIndex);
-            } else if (event.target.matches('input[data-short-memory-char-index]')) {
-                // Short Memory Input
-                const charIndex = parseInt(event.target.dataset.shortMemoryCharIndex, 10);
-                handleShortMemoryCharInput(event.target, charIndex);
-            }
-        }
-
-        /**
-         * Delegated event handler for keydown events within the appContent.
-         * Directs the event to the appropriate handler based on the input's data attributes.
-         * @param {Event} event - The keyboard event.
-         */
-        function handleDynamicKeydownDelegation(event) {
-            if (event.target.matches('input[data-line-index][data-char-index]')) {
-                // Long Memory Answering Keydown
-                handleLongMemoryCharBoxKeydown(event);
-            } else if (event.target.matches('input[data-short-memory-char-index]')) {
-                // Short Memory Keydown
-                handleShortMemoryCharBoxKeydown(event);
-            }
-        }
-
-
-        /**
-         * Renders the appropriate page content based on the current `currentPage` and `activeExerciseType`.
-         * This is the main function to update the UI.
-         */
-        function renderPage() {
-            let content = ExercisePageContent(); // Always render exercise content
-            appContent.innerHTML = content;
-            attachEventListeners(); // Re-attach event listeners after content is rendered
-        }
-
-        // --- Initial Load ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadHighestStreakLengthEver(); // Load scores on app start
-            loadExerciseHistory(); // Load history on app start
-            renderPage(); // Render the initial page
         });
+
+        function bindNav() {
+            document.querySelectorAll('input[data-r]').forEach(el => {
+                el.addEventListener('keydown', e => {
+                    const r = parseInt(el.dataset.r), c = parseInt(el.dataset.c);
+                    let n = null;
+                    if(e.key==='ArrowRight') n=document.querySelector(`input[data-r="${r}"][data-c="${c+1}"]`);
+                    if(e.key==='ArrowLeft') n=document.querySelector(`input[data-r="${r}"][data-c="${c-1}"]`);
+                    if(e.key==='ArrowDown') n=document.querySelector(`input[data-r="${r+1}"][data-c="${c}"]`);
+                    if(e.key==='ArrowUp') n=document.querySelector(`input[data-r="${r-1}"][data-c="${c}"]`);
+                    if(e.key==='Backspace' && !el.value) n=document.querySelector(`input[data-r="${r}"][data-c="${c-1}"]`);
+                    if(n) { if(e.key!=='Backspace') e.preventDefault(); n.focus(); if(e.key!=='Backspace') n.select(); }
+                });
+            });
+        }
+
+        // Init
+        init();
     </script>
 </body>
 </html>
