@@ -25,7 +25,7 @@
         }
     </script>
     <style>
-        /* Nền chống chói */
+        /* Nền chống chói, bảo vệ mắt */
         body { background-color: #f8fafc; color: #334155; }
         
         /* Input tối ưu cảm ứng */
@@ -55,7 +55,7 @@
         /* Lưới nhập liệu thông minh trên mobile */
         .grid-inputs {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); /* Tự động xuống dòng */
+            grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
             gap: 6px;
         }
         @media (min-width: 640px) {
@@ -129,11 +129,22 @@
             // 2. SHORT MEMORY
             else if(activeView === 'sm_play') {
                 if(smShow) {
+                    // Logic chỉnh cỡ chữ thông minh để không bị tràn màn hình
+                    let textSize = 'text-7xl'; // Mặc định cực lớn
+                    if(sm.count > 25) textSize = 'text-2xl';
+                    else if(sm.count > 15) textSize = 'text-3xl';
+                    else if(sm.count > 8) textSize = 'text-5xl';
+
                     html = `
-                    <div class="flex-1 flex flex-col items-center justify-center min-h-[60vh]">
+                    <div class="flex-1 flex flex-col items-center justify-center min-h-[60vh] px-4">
                         <div class="text-slate-400 text-xs font-bold uppercase mb-8 tracking-[0.2em]">GHI NHỚ</div>
-                        <div class="text-7xl md:text-9xl font-mono font-bold text-slate-800 tracking-widest select-none drop-shadow-sm">${sm.data.join('')}</div>
-                        <div class="mt-12 w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                        
+                        <!-- Vùng hiển thị số: break-words để tự xuống dòng -->
+                        <div class="${textSize} font-mono font-bold text-slate-800 tracking-widest select-none drop-shadow-sm text-center w-full break-words leading-relaxed">
+                            ${sm.data.join('')}
+                        </div>
+
+                        <div class="mt-12 w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden flex-none">
                             <div class="h-full bg-primary-600 animate-[width_linear_forwards]" style="width:100%; animation-duration:${Math.max(1, sm.count*0.6)}s"></div>
                         </div>
                     </div>`;
@@ -143,7 +154,7 @@
                     else if(smFeedback) fbHtml = `
                         <div class="mt-8 p-6 bg-white border border-red-100 shadow-lg rounded-2xl text-center animate-shake">
                             <div class="text-red-600 font-bold text-lg mb-1">Sai rồi!</div>
-                            <div class="text-slate-400 text-sm">Đáp án: <span class="font-mono font-bold text-slate-800 text-xl">${smFeedback.split(':')[1]}</span></div>
+                            <div class="text-slate-400 text-sm">Đáp án: <span class="font-mono font-bold text-slate-800 text-xl break-all">${smFeedback.split(':')[1]}</span></div>
                             <button onclick="startSM()" class="mt-4 px-6 py-2 bg-slate-800 text-white rounded-lg font-bold active:bg-slate-900">Thử lại</button>
                         </div>`;
 
@@ -153,7 +164,7 @@
                             <button onclick="goHome()" class="text-slate-400 font-bold text-sm hover:text-slate-600">← Thoát</button>
                             <span class="text-xs font-bold bg-white border px-3 py-1 rounded-full text-slate-500">Level ${sm.count}</span>
                         </div>
-                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 md:p-12 flex flex-col items-center">
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-10 flex flex-col items-center">
                             <p class="text-slate-400 text-xs font-bold uppercase mb-6 tracking-wider">Nhập dãy số</p>
                             <div class="flex flex-wrap justify-center gap-3">
                                 ${Array(sm.count).fill('').map((_, i) => `
@@ -257,7 +268,7 @@
                         let d = Math.abs(line.length - u.length);
                         for(let k=0; k<Math.min(line.length, u.length); k++) if(u[k]!==line[k]) d++;
                         if(d===0) ls=40; else if(d===1) ls=20;
-                    } else { // loose
+                    } else { // loose (last line)
                         let d = 0, len = u.trim().length;
                         for(let k=0; k<Math.min(len, line.length); k++) if(u[k]!==line[k]) d++;
                         if(d===0 && len>0) ls=len; else if(d===1 && len>0) ls=Math.ceil(len/2);
@@ -305,7 +316,7 @@
             }
 
             app.innerHTML = html;
-            // Auto-focus logic
+            // Auto-focus logic for Long Memory Answer phase
             if(activeView === 'lm_ans') setTimeout(bindInputs, 100);
         }
 
@@ -323,11 +334,15 @@
             const wait = Math.max(1000, sm.count*600);
             smTimer = setTimeout(() => {
                 smShow=false; render();
-                // MOBILE AUTO-FOCUS FIX
+                
+                // FIX MOBILE KEYBOARD AUTO-FOCUS
                 setTimeout(() => {
                     const el = document.querySelector('input[data-idx="0"]');
-                    if(el) { el.focus(); el.click(); }
-                }, 100);
+                    if(el) { 
+                        el.focus(); 
+                        el.click(); // Trigger ảo để bật bàn phím iOS
+                    }
+                }, 100); 
             }, wait);
         }
         function checkSM() {
@@ -360,7 +375,6 @@
             const el = document.getElementById(`row-${i}`);
             if(el) {
                 el.classList.toggle('blur-content');
-                // Re-render parent to update label, but keep it simple for now just toggle class
                 render(); 
             }
         }
@@ -414,9 +428,7 @@
             }
         });
 
-        function bindInputs() {
-            // Helper to bind arrow keys if needed, but auto-jump handles most
-        }
+        function bindInputs() {}
 
         // Init
         render();
