@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Memory Pro Mobile</title>
     
-    <!-- CẤU HÌNH LOGO & MÀU SẮC TRÌNH DUYỆT -->
+    <!-- CẤU HÌNH LOGO & MÀU SẮC -->
     <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
-    <!-- Logo Base64 (Tương thích tốt nhất cho Mobile) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEzIDEwVjNMNCAxNGg3djdsOS0xMWgtN3oiLz48L3N2Zz4=">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEzIDEwVjNMNCAxNGg3djdsOS0xMWgtN3oiLz48L3N2Zz4=">
 
@@ -22,7 +21,10 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['Roboto Mono', 'monospace'] },
-                    colors: { primary: { 600: '#2563eb', 700: '#1d4ed8' } }
+                    colors: { primary: { 600: '#2563eb', 700: '#1d4ed8' } },
+                    animation: {
+                        'spin-slow': 'spin 3s linear infinite',
+                    }
                 }
             }
         }
@@ -37,6 +39,9 @@
         .blur-content { opacity: 0.15; filter: blur(5px); user-select: none; }
         .grid-inputs { display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 6px; }
         @media (min-width: 640px) { .grid-inputs { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; } }
+        
+        /* Animation cho vòng tròn đếm ngược */
+        .circle-progress { transition: stroke-dashoffset 1s linear; }
     </style>
 </head>
 <body class="antialiased pb-10 min-h-screen flex flex-col">
@@ -45,7 +50,6 @@
         <div class="container mx-auto px-4 h-full flex items-center justify-between max-w-4xl">
             <div class="flex items-center gap-2 cursor-pointer active:opacity-70" onclick="window.location.reload()">
                 <div class="bg-primary-600 text-white p-1.5 rounded-lg shadow-sm">
-                    <!-- Logo Navbar -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
                 <span class="font-bold text-slate-800 text-lg tracking-tight">Memory<span class="text-primary-600">Pro</span></span>
@@ -58,11 +62,21 @@
     <script>
         // --- STATE ---
         let activeView = 'home'; 
+        
+        // State cho Phản Xạ Nhanh (SM)
         let sm = { data: [], input: [], count: 1, streak: 0, best: parseInt(localStorage.getItem('best_sm')||0) };
         let smTimer = null;
         let smFeedback = '';
         let smShow = false;
+        
+        // State mới cho Countdown
+        let smCountdown = 10;
+        let smCountdownTimer = null;
+        let smCountdownActive = false;
+
+        // State cho Dữ Liệu Lớn (LM)
         let lm = { lines: [], inputs: [], mask: {}, config: { mem: 5, ans: 5, cnt: 2 }, timer: 0, timerId: null };
+        
         const app = document.getElementById('app');
         const fmtTime = s => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
         const grp = s => s ? s.match(/.{1,2}/g).join(' ') : '';
@@ -90,7 +104,36 @@
             }
 
             else if(activeView === 'sm_play') {
-                if(smShow) {
+                // MÀN HÌNH ĐẾM NGƯỢC
+                if(smCountdownActive) {
+                    const radius = 88;
+                    const circumference = 2 * Math.PI * radius; // ~552.9
+                    const offset = circumference * (1 - smCountdown/10); // Tính toán offset để vòng tròn giảm dần
+
+                    html = `
+                    <div class="flex-1 flex flex-col items-center justify-center min-h-[60vh] px-4 animate-fade-in">
+                        <div class="text-slate-400 text-xs font-bold uppercase mb-8 tracking-[0.2em]">CHUẨN BỊ</div>
+                        <div class="relative w-48 h-48 mb-8">
+                            <!-- Vòng tròn nền -->
+                            <svg class="w-full h-full transform -rotate-90">
+                                <circle cx="96" cy="96" r="${radius}" stroke="#e2e8f0" stroke-width="8" fill="none"/>
+                                <!-- Vòng tròn tiến độ -->
+                                <circle cx="96" cy="96" r="${radius}" stroke="#2563eb" stroke-width="8" fill="none" 
+                                        stroke-linecap="round"
+                                        stroke-dasharray="${circumference}" 
+                                        stroke-dashoffset="${offset}"
+                                        class="circle-progress"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-7xl font-black text-slate-800 tabular-nums">${smCountdown}</span>
+                            </div>
+                        </div>
+                        <p class="text-slate-500 text-sm font-medium animate-pulse">Trò chơi bắt đầu sau ${smCountdown} giây...</p>
+                        <button onclick="skipCountdown()" class="mt-8 text-slate-400 text-xs font-bold uppercase hover:text-primary-600">Bỏ qua >></button>
+                    </div>`;
+                }
+                // MÀN HÌNH HIỂN THỊ SỐ
+                else if(smShow) {
                     let textSize = 'text-7xl'; 
                     if(sm.count > 25) textSize = 'text-2xl';
                     else if(sm.count > 15) textSize = 'text-3xl';
@@ -106,7 +149,9 @@
                             <div class="h-full bg-primary-600 animate-[width_linear_forwards]" style="width:100%; animation-duration:${Math.max(1, sm.count*0.6)}s"></div>
                         </div>
                     </div>`;
-                } else {
+                } 
+                // MÀN HÌNH NHẬP KẾT QUẢ
+                else {
                     let fbHtml = '';
                     if(smFeedback === 'correct') fbHtml = `<div class="mt-8 p-4 bg-green-100 text-green-700 rounded-xl font-bold text-center animate-bounce">✨ Chính xác!</div>`;
                     else if(smFeedback) fbHtml = `
@@ -265,7 +310,7 @@
                         <div class="text-slate-500 font-bold text-lg">${totalC} / ${totalT} điểm</div>
                         <div class="flex justify-center gap-3 mt-8">
                             <button onclick="goHome()" class="px-6 py-3 border border-slate-200 rounded-xl font-bold text-slate-600 bg-slate-50">Menu</button>
-                            <button onclick="startLM()" class="px-6 py-3 bg-primary-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200">Làm lại</button>
+                            <button onclick="startSM()" class="px-6 py-3 bg-primary-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200">Làm lại</button>
                         </div>
                     </div>
                     ${details}
@@ -277,11 +322,54 @@
         }
 
         // --- LOGIC ---
-        function goHome() { stopTimer(); activeView = 'home'; render(); }
+        function goHome() { 
+            stopTimer(); 
+            // Clear mọi timer khi thoát
+            if(smTimer) clearTimeout(smTimer);
+            if(smCountdownTimer) clearTimeout(smCountdownTimer);
+            smCountdownActive = false;
+            
+            activeView = 'home'; 
+            render(); 
+        }
         
-        function startSM() { activeView = 'sm_play'; sm.count=1; sm.streak=0; genSM(); }
+        // Logic mới: Bắt đầu game -> Countdown -> Gen số
+        function startSM() { 
+            activeView = 'sm_play'; 
+            sm.count = 1; 
+            sm.streak = 0; 
+            
+            // Khởi tạo countdown
+            smCountdown = 10;
+            smCountdownActive = true;
+            startCountdown();
+        }
+
+        function startCountdown() {
+            render();
+            if(smCountdown > 0) {
+                if(smCountdownTimer) clearTimeout(smCountdownTimer);
+                smCountdownTimer = setTimeout(() => {
+                    smCountdown--;
+                    startCountdown();
+                }, 1000);
+            } else {
+                smCountdownActive = false;
+                clearTimeout(smCountdownTimer);
+                genSM();
+            }
+        }
+        
+        // Hàm phụ trợ để bỏ qua countdown nếu người dùng không muốn đợi
+        function skipCountdown() {
+            if(smCountdownTimer) clearTimeout(smCountdownTimer);
+            smCountdown = 0;
+            smCountdownActive = false;
+            genSM();
+        }
+
         function genSM() {
-            clearTimeout(smTimer);
+            if(smTimer) clearTimeout(smTimer);
             smFeedback=''; smShow=true;
             sm.data = Array.from({length:sm.count}, () => Math.floor(Math.random()*10));
             sm.input = Array(sm.count).fill('');
@@ -303,6 +391,7 @@
                 smFeedback='correct'; sm.streak++;
                 if(sm.streak>sm.best) { sm.best=sm.streak; localStorage.setItem('best_sm', sm.best); }
                 render();
+                // Level kế tiếp không cần countdown lại, chỉ hiện số luôn
                 setTimeout(() => { sm.count++; genSM(); }, 1000);
             } else {
                 smFeedback=`:${r}`; sm.streak=0; render();
