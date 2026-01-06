@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Memory Pro Mobile</title>
+    <title>Memory Pro</title>
     
     <!-- CẤU HÌNH LOGO & MÀU SẮC -->
     <meta name="theme-color" content="#ffffff">
@@ -11,7 +11,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEzIDEwVjNMNCAxNGg3djdsOS0xMWgtN3oiLz48L3N2Zz4=">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEzIDEwVjNMNCAxNGg3djdsOS0xMWgtN3oiLz48L3N2Zz4=">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -24,6 +23,14 @@
                     colors: { primary: { 600: '#2563eb', 700: '#1d4ed8' } },
                     animation: {
                         'spin-slow': 'spin 3s linear infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'width': 'width 1s linear forwards',
+                        'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both'
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        width: { 'from': { width: '100%' }, 'to': { width: '0%' } },
+                        shake: { '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' }, '20%, 80%': { transform: 'translate3d(2px, 0, 0)' }, '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' }, '40%, 60%': { transform: 'translate3d(4px, 0, 0)' } }
                     },
                     gridTemplateColumns: {
                         '20': 'repeat(20, minmax(0, 1fr))',
@@ -41,12 +48,8 @@
         .char-incorrect { color: #b91c1c; text-decoration: line-through; opacity: 0.8; }
         .char-missing { background-color: #fef3c7; color: #b45309; }
         .blur-content { opacity: 0.15; filter: blur(5px); user-select: none; }
-        
-        /* Ẩn thanh cuộn nhưng vẫn cuộn được */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Animation cho vòng tròn đếm ngược */
         .circle-progress { transition: stroke-dashoffset 1s linear; }
     </style>
 </head>
@@ -70,11 +73,11 @@
         let activeView = 'home'; 
         
         // State cho Phản Xạ Nhanh (SM)
-        let sm = { data: [], input: [], count: 1, streak: 0, best: parseInt(localStorage.getItem('best_sm')||0) };
+        let sm = { data: [], input: [], count: 2, streak: 0, best: parseInt(localStorage.getItem('best_sm')||0) }; // Bắt đầu count = 2
         let smTimer = null;
         let smFeedback = '';
         let smShow = false;
-        let smCountdown = 10;
+        let smCountdown = 10; // Giảm xuống 3s cho nhanh (hoặc giữ 10s nếu muốn)
         let smCountdownTimer = null;
         let smCountdownActive = false;
 
@@ -86,8 +89,7 @@
         
         const app = document.getElementById('app');
         const fmtTime = s => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-        const grp = s => s ? s.match(/.{1,2}/g).join(' ') : '';
-
+        
         // --- RENDERER ---
         function render() {
             let html = '';
@@ -98,7 +100,7 @@
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm active:scale-95 transition-transform cursor-pointer" onclick="startSM()">
                         <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-4 shadow-inner">⚡</div>
                         <h2 class="text-xl font-bold text-slate-800">Phản Xạ Nhanh</h2>
-                        <p class="text-slate-500 text-sm mt-1 mb-4">Luyện trí nhớ ngắn hạn.</p>
+                        <p class="text-slate-500 text-sm mt-1 mb-4">Luyện nhớ số nhanh.</p>
                         <div class="text-xs font-bold text-slate-400 uppercase bg-slate-50 inline-block px-2 py-1 rounded">Kỷ lục: ${sm.best}</div>
                     </div>
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm active:scale-95 transition-transform cursor-pointer" onclick="configLM()">
@@ -111,11 +113,10 @@
             }
 
             else if(activeView === 'sm_play') {
-                // (Giữ nguyên code phần Phản Xạ Nhanh)
                 if(smCountdownActive) {
                     const radius = 88;
                     const circumference = 2 * Math.PI * radius; 
-                    const offset = circumference * (1 - smCountdown/10);
+                    const offset = circumference * (1 - smCountdown/3); // Tính theo max 3s
 
                     html = `
                     <div class="flex-1 flex flex-col items-center justify-center min-h-[60vh] px-4 animate-fade-in">
@@ -133,36 +134,41 @@
                                 <span class="text-7xl font-black text-slate-800 tabular-nums">${smCountdown}</span>
                             </div>
                         </div>
-                        <p class="text-slate-500 text-sm font-medium animate-pulse">Trò chơi bắt đầu sau ${smCountdown} giây...</p>
+                        <p class="text-slate-500 text-sm font-medium animate-pulse">Sẵn sàng...</p>
                         <button onclick="skipSMCountdown()" class="mt-8 text-slate-400 text-xs font-bold uppercase hover:text-primary-600">Bỏ qua >></button>
                     </div>`;
                 }
                 else if(smShow) {
                     let textSize = 'text-7xl'; 
-                    if(sm.count > 25) textSize = 'text-2xl';
-                    else if(sm.count > 15) textSize = 'text-3xl';
-                    else if(sm.count > 10) textSize = 'text-4xl'; 
+                    // Điều chỉnh size chữ vì số lượng tăng nhanh
+                    if(sm.count > 20) textSize = 'text-2xl';
+                    else if(sm.count > 12) textSize = 'text-4xl';
+                    else if(sm.count > 8) textSize = 'text-5xl'; 
 
                     const displayRows = [];
+                    // Ngắt dòng mỗi 10 số để dễ nhìn trên mobile
                     for(let i=0; i < sm.data.length; i+=10) {
                         displayRows.push(sm.data.slice(i, i+10).join(''));
                     }
                     const displayHtml = displayRows.map(row => `<div>${row}</div>`).join('');
 
+                    // Thời gian hiển thị: tăng nhẹ hệ số lên 700ms/số để phù hợp độ khó tăng nhanh
+                    const duration = Math.max(1.5, sm.count * 0.7);
+
                     html = `
                     <div class="flex-1 flex flex-col items-center justify-center min-h-[60vh] px-4">
-                        <div class="text-slate-400 text-xs font-bold uppercase mb-8 tracking-[0.2em]">GHI NHỚ</div>
+                        <div class="text-slate-400 text-xs font-bold uppercase mb-8 tracking-[0.2em]">GHI NHỚ (${sm.count} SỐ)</div>
                         <div class="${textSize} font-mono font-bold text-slate-800 tracking-widest select-none drop-shadow-sm text-center w-full break-words leading-relaxed flex flex-col gap-2">
                             ${displayHtml}
                         </div>
                         <div class="mt-12 w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden flex-none">
-                            <div class="h-full bg-primary-600 animate-[width_linear_forwards]" style="width:100%; animation-duration:${Math.max(1, sm.count*0.6)}s"></div>
+                            <div class="h-full bg-primary-600 animate-[width_linear_forwards]" style="width:100%; animation-duration:${duration}s"></div>
                         </div>
                     </div>`;
                 } 
                 else {
                     let fbHtml = '';
-                    if(smFeedback === 'correct') fbHtml = `<div class="mt-8 p-4 bg-green-100 text-green-700 rounded-xl font-bold text-center animate-bounce">✨ Chính xác!</div>`;
+                    if(smFeedback === 'correct') fbHtml = `<div class="mt-8 p-4 bg-green-100 text-green-700 rounded-xl font-bold text-center animate-bounce">✨ Chính xác! (+2 số)</div>`;
                     else if(smFeedback) fbHtml = `
                         <div class="mt-8 p-6 bg-white border border-red-100 shadow-lg rounded-2xl text-center animate-shake">
                             <div class="text-red-600 font-bold text-lg mb-1">Sai rồi!</div>
@@ -181,11 +187,11 @@
                     <div class="max-w-4xl mx-auto w-full mt-4 px-4">
                         <div class="flex justify-between items-center mb-6">
                             <button onclick="goHome()" class="text-slate-400 font-bold text-sm hover:text-slate-600">← Thoát</button>
-                            <span class="text-xs font-bold bg-white border px-3 py-1 rounded-full text-slate-500">Level ${sm.count}</span>
+                            <span class="text-xs font-bold bg-white border px-3 py-1 rounded-full text-slate-500">Level ${sm.count} số</span>
                         </div>
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-8 flex flex-col items-center">
                             <p class="text-slate-400 text-xs font-bold uppercase mb-6 tracking-wider">Nhập dãy số</p>
-                            <div class="grid grid-cols-10 gap-1.5 md:gap-3 w-full max-w-3xl">
+                            <div class="grid grid-cols-8 md:grid-cols-10 gap-1.5 md:gap-3 w-full max-w-3xl">
                                 ${inputs}
                             </div>
                             ${fbHtml}
@@ -193,9 +199,10 @@
                     </div>`;
                 }
             }
-
+            
+            // --- CÁC VIEW CỦA PHẦN DỮ LIỆU LỚN (GIỮ NGUYÊN) ---
             else if(activeView === 'lm_cfg') {
-                html = `
+                 html = `
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 max-w-md mx-auto mt-6 px-6">
                     <h2 class="text-xl font-bold text-slate-800 mb-6">Cấu hình bài tập</h2>
                     <div class="space-y-5">
@@ -209,7 +216,6 @@
                     </div>
                 </div>`;
             }
-
             else if(activeView === 'lm_countdown') {
                 const radius = 88;
                 const circumference = 2 * Math.PI * radius; 
@@ -235,7 +241,6 @@
                     <button onclick="skipLMCountdown()" class="mt-8 text-slate-400 text-xs font-bold uppercase hover:text-primary-600">Bỏ qua >></button>
                 </div>`;
             }
-
             else if(activeView === 'lm_mem') {
                 const rows = lm.lines.map((line, i) => `
                     <div class="bg-white rounded-xl border border-slate-200 p-2 mb-2 shadow-sm active:scale-[0.99] transition-transform" onclick="toggleMask(${i})">
@@ -243,8 +248,6 @@
                             <span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[10px] font-bold uppercase">Dòng ${i+1}</span>
                             ${lm.mask[i] ? '<span class="text-[10px] font-bold text-slate-400 flex items-center gap-1">👁️ Đã che</span>' : ''}
                         </div>
-                        
-                        <!-- MÀN HÌNH GHI NHỚ: Đã thêm tracking-[0.15em] để tạo khoảng cách -->
                         <div class="w-full overflow-x-auto no-scrollbar">
                             <div id="row-${i}" 
                                  class="font-mono text-[11px] sm:text-sm md:text-xl text-slate-800 leading-tight tracking-[0.15em] whitespace-nowrap 
@@ -252,14 +255,12 @@
                                 ${line}
                             </div>
                         </div>
-                        
                     </div>
                 `).join('');
 
                 html = `
                 <div class="flex flex-col h-full">
                     <div class="sticky top-0 z-20 bg-[#f8fafc] pb-2 pt-2">
-                        <!-- HEADER ĐIỀU KHIỂN -->
                         <div class="flex gap-2 mb-2 px-1">
                             <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex-1 flex justify-between items-center">
                                 <div>
@@ -276,7 +277,6 @@
                     <div class="flex-1 pb-10 space-y-1 overflow-y-auto px-1">${rows}</div>
                 </div>`;
             }
-
             else if(activeView === 'lm_ans') {
                 const rows = lm.inputs.map((_, r) => `
                     <div class="bg-white rounded-xl border border-slate-200 p-2 mb-3 shadow-sm">
@@ -284,8 +284,6 @@
                             <span class="text-[10px] font-bold text-slate-400 uppercase">Dòng ${r+1}</span>
                             <span id="prog-${r}" class="text-[10px] font-bold text-slate-300">0/40</span>
                         </div>
-                        
-                        <!-- GRID INPUT: 20 cột (Mobile) / 40 cột (Desktop) -->
                         <div class="grid grid-cols-20 md:grid-cols-40 gap-[1px] md:gap-[2px]">
                             ${Array(40).fill('').map((_, c) => `
                                 <input data-type="lm" data-r="${r}" data-c="${c}" value="${lm.inputs[r][c]}" type="tel" pattern="[0-9]*" maxlength="1"
@@ -298,7 +296,6 @@
                 html = `
                 <div class="flex flex-col h-full">
                     <div class="sticky top-0 z-20 bg-[#f8fafc] pb-2 pt-2">
-                         <!-- HEADER ĐIỀU KHIỂN -->
                         <div class="flex gap-2 mb-2 px-1">
                             <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex-1 flex justify-between items-center">
                                  <div>
@@ -315,7 +312,6 @@
                     <div class="flex-1 pb-10 px-1 overflow-y-auto">${rows}</div>
                 </div>`;
             }
-
             else if(activeView === 'lm_res') {
                 let totalC = 0, totalT = 0;
                 const details = lm.lines.map((line, i) => {
@@ -349,7 +345,6 @@
                         <div class="space-y-3 font-mono text-[11px] sm:text-sm md:text-base">
                             <div>
                                 <span class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Gốc</span>
-                                <!-- RESULT VIEW: Đã thêm tracking-[0.15em] -->
                                 <div class="text-slate-500 tracking-[0.15em] whitespace-nowrap overflow-x-auto no-scrollbar">
                                     ${line}
                                 </div>
@@ -398,19 +393,17 @@
             if(smTimer) clearTimeout(smTimer);
             if(smCountdownTimer) clearTimeout(smCountdownTimer);
             if(lmCountdownTimer) clearTimeout(lmCountdownTimer);
-            
             smCountdownActive = false;
             lmCountdownActive = false;
-            
             activeView = 'home'; 
             render(); 
         }
         
         function startSM() { 
             activeView = 'sm_play'; 
-            sm.count = 1; 
+            sm.count = 2; // START CHANGE: Bắt đầu 2 số
             sm.streak = 0; 
-            smCountdown = 10;
+            smCountdown = 3; // Đếm ngược 3s cho nhanh
             smCountdownActive = true;
             startSMCountdown();
         }
@@ -444,7 +437,8 @@
             sm.input = Array(sm.count).fill('');
             render();
             
-            const wait = Math.max(1000, sm.count*600);
+            // Thời gian hiển thị: 1500ms tối thiểu, hoặc 700ms mỗi số
+            const wait = Math.max(1500, sm.count*700);
             smTimer = setTimeout(() => {
                 smShow=false; render();
                 setTimeout(() => {
@@ -453,6 +447,7 @@
                 }, 150);
             }, wait);
         }
+        
         function checkSM() {
             const u = sm.input.join('');
             const r = sm.data.join('');
@@ -460,22 +455,21 @@
                 smFeedback='correct'; sm.streak++;
                 if(sm.streak>sm.best) { sm.best=sm.streak; localStorage.setItem('best_sm', sm.best); }
                 render();
-                setTimeout(() => { sm.count++; genSM(); }, 1000);
+                // CHANGE: Tăng 2 số mỗi lần đúng
+                setTimeout(() => { sm.count += 2; genSM(); }, 1000);
             } else {
                 smFeedback=`:${r}`; sm.streak=0; render();
             }
         }
 
+        // Logic phần LM giữ nguyên
         function configLM() { activeView='lm_cfg'; render(); }
-        
         function startLM() {
             lm.config.mem = parseInt(document.getElementById('lm-mem').value)||5;
             lm.config.ans = parseInt(document.getElementById('lm-ans').value)||5;
             lm.config.cnt = parseInt(document.getElementById('lm-cnt').value)||2;
-            
             lm.lines = Array(lm.config.cnt).fill().map(() => Array.from({length:40}, ()=>Math.floor(Math.random()*10)).join(''));
             lm.mask = {};
-            
             activeView = 'lm_countdown';
             lmCountdown = 10;
             lmCountdownActive = true;
@@ -539,15 +533,19 @@
             }, 1000);
         }
         function stopTimer() { if(lm.timerId) clearInterval(lm.timerId); }
+        function bindInputs() {}
 
+        // Global Event Listeners
         document.addEventListener('input', e => {
             const t = e.target;
+            // Xử lý nhập liệu SM
             if(t.dataset.type === 'sm') {
                 const i = parseInt(t.dataset.idx);
                 sm.input[i] = t.value;
                 if(t.value && i < sm.count-1) document.querySelector(`input[data-idx="${i+1}"]`).focus();
                 if(sm.input.join('').length === sm.count) checkSM();
             }
+            // Xử lý nhập liệu LM
             if(t.dataset.type === 'lm') {
                 const r = parseInt(t.dataset.r), c = parseInt(t.dataset.c);
                 lm.inputs[r][c] = t.value;
@@ -561,8 +559,7 @@
             }
         });
 
-        function bindInputs() {}
-
+        // Khởi động
         render();
     </script>
 </body>
