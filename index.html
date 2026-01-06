@@ -77,7 +77,7 @@
         let smTimer = null;
         let smFeedback = '';
         let smShow = false;
-        let smCountdown = 10; // Giảm xuống 3s cho nhanh (hoặc giữ 10s nếu muốn)
+        let smCountdown = 10; // GIỮ NGUYÊN 10 GIÂY
         let smCountdownTimer = null;
         let smCountdownActive = false;
 
@@ -116,7 +116,7 @@
                 if(smCountdownActive) {
                     const radius = 88;
                     const circumference = 2 * Math.PI * radius; 
-                    const offset = circumference * (1 - smCountdown/3); // Tính theo max 3s
+                    const offset = circumference * (1 - smCountdown/10); // Tính toán dựa trên 10 giây
 
                     html = `
                     <div class="flex-1 flex flex-col items-center justify-center min-h-[60vh] px-4 animate-fade-in">
@@ -134,7 +134,7 @@
                                 <span class="text-7xl font-black text-slate-800 tabular-nums">${smCountdown}</span>
                             </div>
                         </div>
-                        <p class="text-slate-500 text-sm font-medium animate-pulse">Sẵn sàng...</p>
+                        <p class="text-slate-500 text-sm font-medium animate-pulse">Trò chơi bắt đầu sau ${smCountdown} giây...</p>
                         <button onclick="skipSMCountdown()" class="mt-8 text-slate-400 text-xs font-bold uppercase hover:text-primary-600">Bỏ qua >></button>
                     </div>`;
                 }
@@ -152,7 +152,7 @@
                     }
                     const displayHtml = displayRows.map(row => `<div>${row}</div>`).join('');
 
-                    // Thời gian hiển thị: tăng nhẹ hệ số lên 700ms/số để phù hợp độ khó tăng nhanh
+                    // Thời gian hiển thị
                     const duration = Math.max(1.5, sm.count * 0.7);
 
                     html = `
@@ -200,7 +200,7 @@
                 }
             }
             
-            // --- CÁC VIEW CỦA PHẦN DỮ LIỆU LỚN (GIỮ NGUYÊN) ---
+            // --- CÁC VIEW CỦA PHẦN DỮ LIỆU LỚN ---
             else if(activeView === 'lm_cfg') {
                  html = `
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 max-w-md mx-auto mt-6 px-6">
@@ -401,9 +401,9 @@
         
         function startSM() { 
             activeView = 'sm_play'; 
-            sm.count = 2; // START CHANGE: Bắt đầu 2 số
+            sm.count = 2; 
             sm.streak = 0; 
-            smCountdown = 3; // Đếm ngược 3s cho nhanh
+            smCountdown = 10; // ĐÃ TRẢ VỀ 10 GIÂY
             smCountdownActive = true;
             startSMCountdown();
         }
@@ -437,7 +437,6 @@
             sm.input = Array(sm.count).fill('');
             render();
             
-            // Thời gian hiển thị: 1500ms tối thiểu, hoặc 700ms mỗi số
             const wait = Math.max(1500, sm.count*700);
             smTimer = setTimeout(() => {
                 smShow=false; render();
@@ -455,7 +454,6 @@
                 smFeedback='correct'; sm.streak++;
                 if(sm.streak>sm.best) { sm.best=sm.streak; localStorage.setItem('best_sm', sm.best); }
                 render();
-                // CHANGE: Tăng 2 số mỗi lần đúng
                 setTimeout(() => { sm.count += 2; genSM(); }, 1000);
             } else {
                 smFeedback=`:${r}`; sm.streak=0; render();
@@ -538,14 +536,12 @@
         // Global Event Listeners
         document.addEventListener('input', e => {
             const t = e.target;
-            // Xử lý nhập liệu SM
             if(t.dataset.type === 'sm') {
                 const i = parseInt(t.dataset.idx);
                 sm.input[i] = t.value;
                 if(t.value && i < sm.count-1) document.querySelector(`input[data-idx="${i+1}"]`).focus();
                 if(sm.input.join('').length === sm.count) checkSM();
             }
-            // Xử lý nhập liệu LM
             if(t.dataset.type === 'lm') {
                 const r = parseInt(t.dataset.r), c = parseInt(t.dataset.c);
                 lm.inputs[r][c] = t.value;
@@ -559,7 +555,6 @@
             }
         });
 
-        // Khởi động
         render();
     </script>
 </body>
